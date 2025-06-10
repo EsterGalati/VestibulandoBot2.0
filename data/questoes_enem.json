@@ -1,53 +1,53 @@
 [
   {
-    "id": 24,
-    "subject": "Geografia",
-    "difficulty": "Intermediário",
-    "question": "Texto-base:\n\n“Os principais fatores relacionados à ocorrência de movimentos de massa no Brasil incluem a ocupação irregular de encostas, desmatamento e chuvas intensas.”\n\nEnunciado: Com base no texto, um fator antrópico que contribui para os deslizamentos é:",
+    "id": 30,
+    "subject": "Linguagens",
+    "difficulty": "Avançado",
+    "question": "Texto-base:\n\n“O sistema prisional brasileiro é um reflexo das desigualdades históricas do país. A maior parte da população carcerária é composta por jovens negros e pobres, oriundos das periferias urbanas, o que evidencia que o encarceramento em massa está mais relacionado ao controle social do que à segurança pública. [...] A discussão sobre alternativas penais e políticas de reintegração social é fundamental para romper com o ciclo da criminalização da pobreza.”\n\nEnunciado: A intenção do autor ao redigir esse texto é:",
     "options": [
-      "o excesso de evaporação natural",
-      "a compactação natural do solo",
-      "o desmatamento das encostas",
-      "a inclinação original do relevo",
-      "as chuvas orográficas espontâneas"
+      "divulgar dados estatísticos sobre a população carcerária.",
+      "justificar o encarceramento como ferramenta de justiça.",
+      "promover uma reflexão crítica sobre o sistema prisional.",
+      "mostrar a eficácia das políticas de segurança pública.",
+      "propor reformas no sistema penitenciário internacional."
     ],
     "correct_answer": 2,
-    "explanation": "O desmatamento reduz a estabilidade do solo, contribuindo para deslizamentos, especialmente em áreas urbanizadas.",
-    "tags": ["geografia", "meio ambiente", "deslizamentos"],
-    "year": 2021
+    "explanation": "O texto promove uma análise crítica do sistema prisional, questionando o viés social do encarceramento em massa.",
+    "tags": ["sociologia", "linguagem", "desigualdade social", "sistema prisional"],
+    "year": 2024
   },
   {
-    "id": 25,
+    "id": 31,
     "subject": "Linguagens",
     "difficulty": "Intermediário",
-    "question": "Texto-base:\n\n“O cordel, expressão da literatura popular, utiliza linguagem coloquial e temática do cotidiano nordestino para transmitir ensinamentos e críticas sociais.”\n\nEnunciado: O texto destaca o cordel como um meio de:",
+    "question": "Texto-base:\n\n“O romance 'Quarto de Despejo', de Carolina Maria de Jesus, revela, por meio de uma escrita visceral e direta, o cotidiano de miséria, racismo e fome vivenciado nas favelas brasileiras. Ao transformar sua experiência em narrativa literária, a autora inscreve na literatura nacional uma voz marginalizada, que desafia a lógica dominante do cânone literário tradicional.”\n\nEnunciado: De acordo com o texto, a relevância da obra de Carolina Maria de Jesus decorre da:",
     "options": [
-      "transmissão oral de mitos indígenas",
-      "reprodução fiel da literatura europeia",
-      "valorização da cultura popular regional",
-      "divulgação da norma culta acadêmica",
-      "afirmação do pensamento científico"
-    ],
-    "correct_answer": 2,
-    "explanation": "O cordel valoriza a cultura popular, especialmente do Nordeste, com linguagem acessível e temas do cotidiano.",
-    "tags": ["literatura", "cordel", "cultura popular"],
-    "year": 2022
-  },
-  {
-    "id": 26,
-    "subject": "Física",
-    "difficulty": "Avançado",
-    "question": "Texto-base:\n\n“No lançamento de um projétil em um campo gravitacional uniforme e sem resistência do ar, o movimento descrito é uma parábola, sendo a velocidade inicial decomposta em dois vetores: um horizontal constante e um vertical uniformemente variado.”\n\nEnunciado: A trajetória do projétil nesse tipo de movimento é:",
-    "options": [
-      "retilínea uniforme",
-      "circular uniforme",
-      "elíptica com aceleração constante",
-      "parabólica com aceleração constante",
-      "helicoidal com aceleração variável"
+      "abordagem de temas universais como amor e morte.",
+      "difusão de valores morais por meio da literatura.",
+      "romantização da pobreza e da vida na periferia.",
+      "visibilidade concedida a sujeitos historicamente silenciados.",
+      "adesão aos padrões estéticos da literatura clássica."
     ],
     "correct_answer": 3,
-    "explanation": "No lançamento oblíquo sem resistência do ar, o projétil segue uma trajetória parabólica sob ação da gravidade constante.",
-    "tags": ["física", "movimento", "lançamento oblíquo"],
-    "year": 2023
+    "explanation": "O texto destaca a importância da autora ao trazer para a literatura uma perspectiva periférica e marginalizada.",
+    "tags": ["literatura", "Carolina Maria de Jesus", "representatividade", "realismo social"],
+    "year": 2024
+  },
+  {
+    "id": 32,
+    "subject": "Linguagens",
+    "difficulty": "Avançado",
+    "question": "Texto-base:\n\n“Com a crescente influência das redes sociais, o debate público passou a ser moldado por algoritmos que priorizam conteúdos com maior potencial de engajamento. Isso gera bolhas informacionais, onde os indivíduos são expostos apenas a opiniões semelhantes às suas, dificultando o diálogo democrático e o confronto de ideias. A desinformação, nesse contexto, encontra terreno fértil para se disseminar.”\n\nEnunciado: O texto aponta como efeito negativo da atuação dos algoritmos nas redes sociais:",
+    "options": [
+      "a ampliação do alcance de notícias verificadas.",
+      "o incentivo à pluralidade de opiniões.",
+      "a intensificação do engajamento político tradicional.",
+      "a fragmentação do debate e a propagação de desinformação.",
+      "o aumento do acesso a conteúdos educacionais confiáveis."
+    ],
+    "correct_answer": 3,
+    "explanation": "O texto destaca que os algoritmos favorecem o fechamento em bolhas e a propagação de fake news, prejudicando o debate público.",
+    "tags": ["tecnologia", "comunicação", "desinformação", "redes sociais"],
+    "year": 2024
   }
 ]
