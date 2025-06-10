@@ -5,6 +5,10 @@ import db  # Módulo de persistência SQLite
 def challenge_mode(questions_bank):
     st.markdown('<div class="main-header"><h1>🏆 Modo Desafio</h1><p>Teste seus conhecimentos com questões práticas</p></div>', unsafe_allow_html=True)
 
+    # Inicializa lista de questões respondidas na sessão
+    if 'questoes_respondidas' not in st.session_state:
+        st.session_state.questoes_respondidas = set()
+
     # Estatísticas rápidas
     col1, col2, col3, col4 = st.columns(4)
     correct = st.session_state.session_stats.get('correct', 0)
@@ -23,12 +27,25 @@ def challenge_mode(questions_bank):
 
     st.markdown("---")
 
+    # Lista de questões ainda não respondidas
+    questoes_disponiveis = [q for q in questions_bank if q.id not in st.session_state.questoes_respondidas]
+
+    # Fim das questões
+    if not questoes_disponiveis:
+        st.success("✅ Você respondeu todas as questões disponíveis desta sessão!")
+        if st.button("🔁 Reiniciar Sessão"):
+            st.session_state.questoes_respondidas = set()
+            st.session_state.current_question = None
+            st.session_state.show_result = False
+            st.rerun()
+        return
+
     # Início do desafio
     if st.session_state.current_question is None:
         st.markdown("### 🚀 Pronto para o desafio?")
         st.write("Teste seus conhecimentos com questões do banco de dados educacional.")
         if st.button("🎯 Iniciar Nova Questão", type="primary", use_container_width=True):
-            st.session_state.current_question = random.choice(questions_bank)
+            st.session_state.current_question = random.choice(questoes_disponiveis)
             st.session_state.show_result = False
             st.rerun()
 
@@ -79,6 +96,9 @@ def challenge_mode(questions_bank):
                     db.atualizar_estatisticas(usuario_id, subject, is_correct)
                     db.atualizar_progresso(usuario_id, is_correct)
 
+                # Marca como respondida
+                st.session_state.questoes_respondidas.add(question.id)
+
                 # Mostra resultado
                 st.session_state.show_result = True
                 st.session_state.selected_answer_index = selected_index
@@ -106,7 +126,13 @@ def challenge_mode(questions_bank):
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("➡️ Próxima Questão", type="primary"):
-                    st.session_state.current_question = None
+                    nova_disponivel = [q for q in questions_bank if q.id not in st.session_state.questoes_respondidas]
+                    if nova_disponivel:
+                        st.session_state.current_question = random.choice(nova_disponivel)
+                        st.session_state.show_result = False
+                    else:
+                        st.session_state.current_question = None
+                        st.success("🎉 Você concluiu todas as questões!")
                     st.rerun()
             with col2:
                 if st.button("🏠 Voltar ao Início"):

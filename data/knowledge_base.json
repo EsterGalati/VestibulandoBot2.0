@@ -1,34 +1,20 @@
-[
-  {
-    "id": 14,
-    "subject": "Linguagens",
-    "difficulty": "Intermediário",
-    "question": "Leia o texto-base:\n\n“Denise Cogo, doutora em comunicação, discute a relação entre as tecnologias digitais e as migrações no mundo... ‘com um celular na mão, os próprios imigrantes possam narrar suas histórias’.”\n\nEnunciado: Segundo o texto, a presença de tecnologias digitais nas migrações traz a possibilidade de:",
-    "options": [
-      "os imigrantes dependerem exclusivamente dos meios tradicionais de comunicação.",
-      "o surgimento de narrativas oficiais únicas sobre imigração.",
-      "os próprios imigrantes contarem suas histórias diretamente.",
-      "a mídia manter o controle total sobre as representações imigratórias.",
-      "haver menos interação entre imigrantes e suas famílias."
-    ],
-    "correct_answer": 2,
-    "explanation": "O texto aponta que as tecnologias digitais permitem que os imigrantes contem suas próprias histórias diretamente 📱.",
-    "tags": ["interpretação", "tecnologia", "migração"]
+{
+  "Matemática": {
+    "Equações do segundo grau": "Equações do segundo grau possuem a forma ax² + bx + c = 0. Para resolvê-las, utiliza-se a fórmula de Bhaskara: x = (-b ± √(b² - 4ac)) / 2a.",
+    "Logaritmos": "Logaritmos são operações inversas da potenciação. Se 10² = 100, então log₁₀(100) = 2. No ENEM, são frequentemente usados para calcular pH ou crescimento exponencial."
   },
-  {
-    "id": 15,
-    "subject": "Linguagens",
-    "difficulty": "Intermediário",
-    "question": "Texto-base:\n\n“A mídia é mediadora das relações... o imigrante não é só um sujeito econômico, mas um sujeito sociocultural.”\n\nEnunciado: O autor afirma que o imigrante deve ser visto principalmente como:",
-    "options": [
-      "um agente econômico dentro do mercado.",
-      "um ser sociocultural com voz própria.",
-      "alguém apático às mudanças sociais.",
-      "um elemento neutro na sociedade.",
-      "um sujeito sem influência cultural."
-    ],
-    "correct_answer": 1,
-    "explanation": "O texto enfatiza que o imigrante é um sujeito sociocultural, com voz e representação própria.",
-    "tags": ["interpretação", "migração", "cultura"]
+  "Linguagens": {
+    "Figuras de linguagem": "Figuras de linguagem são recursos estilísticos usados para dar expressividade à linguagem. Exemplos: metáfora, hipérbole, metonímia, antítese e ironia.",
+    "Estrutura da redação ENEM": "A redação do ENEM exige um texto dissertativo-argumentativo com introdução, desenvolvimento e conclusão, defendendo um ponto de vista com proposta de intervenção."
+  },
+  "Física": {
+    "Cinemática": "Cinemática é a parte da física que estuda o movimento dos corpos sem se preocupar com suas causas. Inclui conceitos como velocidade, aceleração, MRU e MRUV.",
+    "Leis da termodinâmica": "A 1ª lei trata da conservação da energia, a 2ª da entropia (tendência à desordem) e a 3ª estabelece que é impossível atingir o zero absoluto."
+  },
+  "Biologia": {
+    "Organelas celulares": "Organelas são estruturas internas da célula com funções específicas. Ex: mitocôndrias (respiração), ribossomos (síntese de proteínas), lisossomos (digestão celular)."
+  },
+  "História": {
+    "Revolução Industrial": "A Revolução Industrial foi um processo de transição do trabalho artesanal para o uso de máquinas, iniciado na Inglaterra no século XVIII, transformando a economia e a sociedade."
   }
-]
+}
