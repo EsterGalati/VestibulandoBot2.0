@@ -1,0 +1,34 @@
+[
+  {
+    "id": 14,
+    "subject": "Linguagens",
+    "difficulty": "Intermediário",
+    "question": "Leia o texto-base:\n\n“Denise Cogo, doutora em comunicação, discute a relação entre as tecnologias digitais e as migrações no mundo... ‘com um celular na mão, os próprios imigrantes possam narrar suas histórias’.”\n\nEnunciado: Segundo o texto, a presença de tecnologias digitais nas migrações traz a possibilidade de:",
+    "options": [
+      "os imigrantes dependerem exclusivamente dos meios tradicionais de comunicação.",
+      "o surgimento de narrativas oficiais únicas sobre imigração.",
+      "os próprios imigrantes contarem suas histórias diretamente.",
+      "a mídia manter o controle total sobre as representações imigratórias.",
+      "haver menos interação entre imigrantes e suas famílias."
+    ],
+    "correct_answer": 2,
+    "explanation": "O texto aponta que as tecnologias digitais permitem que os imigrantes contem suas próprias histórias diretamente 📱.",
+    "tags": ["interpretação", "tecnologia", "migração"]
+  },
+  {
+    "id": 15,
+    "subject": "Linguagens",
+    "difficulty": "Intermediário",
+    "question": "Texto-base:\n\n“A mídia é mediadora das relações... o imigrante não é só um sujeito econômico, mas um sujeito sociocultural.”\n\nEnunciado: O autor afirma que o imigrante deve ser visto principalmente como:",
+    "options": [
+      "um agente econômico dentro do mercado.",
+      "um ser sociocultural com voz própria.",
+      "alguém apático às mudanças sociais.",
+      "um elemento neutro na sociedade.",
+      "um sujeito sem influência cultural."
+    ],
+    "correct_answer": 1,
+    "explanation": "O texto enfatiza que o imigrante é um sujeito sociocultural, com voz e representação própria.",
+    "tags": ["interpretação", "migração", "cultura"]
+  }
+]

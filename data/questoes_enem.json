@@ -1,0 +1,53 @@
+[
+  {
+    "id": 24,
+    "subject": "Geografia",
+    "difficulty": "Intermediário",
+    "question": "Texto-base:\n\n“Os principais fatores relacionados à ocorrência de movimentos de massa no Brasil incluem a ocupação irregular de encostas, desmatamento e chuvas intensas.”\n\nEnunciado: Com base no texto, um fator antrópico que contribui para os deslizamentos é:",
+    "options": [
+      "o excesso de evaporação natural",
+      "a compactação natural do solo",
+      "o desmatamento das encostas",
+      "a inclinação original do relevo",
+      "as chuvas orográficas espontâneas"
+    ],
+    "correct_answer": 2,
+    "explanation": "O desmatamento reduz a estabilidade do solo, contribuindo para deslizamentos, especialmente em áreas urbanizadas.",
+    "tags": ["geografia", "meio ambiente", "deslizamentos"],
+    "year": 2021
+  },
+  {
+    "id": 25,
+    "subject": "Linguagens",
+    "difficulty": "Intermediário",
+    "question": "Texto-base:\n\n“O cordel, expressão da literatura popular, utiliza linguagem coloquial e temática do cotidiano nordestino para transmitir ensinamentos e críticas sociais.”\n\nEnunciado: O texto destaca o cordel como um meio de:",
+    "options": [
+      "transmissão oral de mitos indígenas",
+      "reprodução fiel da literatura europeia",
+      "valorização da cultura popular regional",
+      "divulgação da norma culta acadêmica",
+      "afirmação do pensamento científico"
+    ],
+    "correct_answer": 2,
+    "explanation": "O cordel valoriza a cultura popular, especialmente do Nordeste, com linguagem acessível e temas do cotidiano.",
+    "tags": ["literatura", "cordel", "cultura popular"],
+    "year": 2022
+  },
+  {
+    "id": 26,
+    "subject": "Física",
+    "difficulty": "Avançado",
+    "question": "Texto-base:\n\n“No lançamento de um projétil em um campo gravitacional uniforme e sem resistência do ar, o movimento descrito é uma parábola, sendo a velocidade inicial decomposta em dois vetores: um horizontal constante e um vertical uniformemente variado.”\n\nEnunciado: A trajetória do projétil nesse tipo de movimento é:",
+    "options": [
+      "retilínea uniforme",
+      "circular uniforme",
+      "elíptica com aceleração constante",
+      "parabólica com aceleração constante",
+      "helicoidal com aceleração variável"
+    ],
+    "correct_answer": 3,
+    "explanation": "No lançamento oblíquo sem resistência do ar, o projétil segue uma trajetória parabólica sob ação da gravidade constante.",
+    "tags": ["física", "movimento", "lançamento oblíquo"],
+    "year": 2023
+  }
+]

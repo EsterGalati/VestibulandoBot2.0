@@ -1,0 +1,85 @@
+/* 🔵🟢 Fundo global com degradê */
+body,
+.stApp {
+    background: linear-gradient(135deg, #4F46E5 0%, #10B981 100%) !important;
+    color: #FAFAFA;
+}
+
+/* Cabeçalho principal */
+.main-header {
+    background: rgba(255, 255, 255, 0.1);
+    /* Leve transparência para destacar */
+    padding: 1.2rem;
+    border-radius: 10px;
+    color: #FFFFFF;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Cartões de estatísticas */
+.stat-card {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 1rem;
+    border-radius: 10px;
+    border-left: 4px solid #FFFFFF;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    color: #FFFFFF;
+}
+
+/* Cartão de questão */
+.question-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid #FFFFFF33;
+    color: #FFFFFF;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 1rem 0;
+}
+
+/* Chat */
+.chat-message {
+    padding: 1rem;
+    border-radius: 10px;
+    margin: 0.5rem 0;
+    max-width: 80%;
+    font-size: 0.95rem;
+}
+
+.user-message {
+    background: #4F46E5;
+    color: #FFFFFF;
+    margin-left: auto;
+    margin-right: 0;
+    text-align: right;
+}
+
+.bot-message {
+    background: #FFFFFF;
+    color: #1a1c22;
+    margin-right: auto;
+    margin-left: 0;
+    text-align: left;
+}
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: #FFFFFF;
+}
+
+/* Inputs e botões */
+button,
+.stButton button,
+input,
+textarea {
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #FFFFFF;
+    border: 1px solid #FFFFFF66;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #E0E0E0;
+}
