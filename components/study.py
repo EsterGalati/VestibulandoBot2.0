@@ -3,7 +3,7 @@ import datetime
 import time
 import db  # módulo de banco de dados
 from models import Message
-from utils.pdf_agent import gerar_pdf
+from utils.pdf_agent import gerar_pdf_chat  # função nova para exportar todo o histórico
 
 def study_mode(knowledge_base):
     st.markdown('<div class="main-header"><h1>🧠 Modo Estudo</h1><p>Tire suas dúvidas e aprofunde seus conhecimentos</p></div>', unsafe_allow_html=True)
@@ -50,18 +50,14 @@ def study_mode(knowledge_base):
                 st.session_state.messages.append(bot_msg)
                 st.rerun()
 
-        # 🔽 Exportar PDF da última pergunta + resposta
-        if len(st.session_state.messages) >= 2:
-            ultima_pergunta = st.session_state.messages[-2].content
-            ultima_resposta = st.session_state.messages[-1].content
-
-            if st.button("📄 Exportar Conversa como PDF"):
-                conteudo_pdf = f"❓ <b>Pergunta:</b> {ultima_pergunta}\n\n🤖 <b>Resposta:</b> {ultima_resposta}"
-                pdf_bytes = gerar_pdf(conteudo_pdf, titulo="Estudo com VestibulandoBot")
+        # 🔽 Exportar histórico completo do chat em PDF
+        if st.session_state.messages:
+            if st.button("📄 Exportar Histórico Completo em PDF"):
+                pdf_bytes = gerar_pdf_chat(st.session_state.messages)
                 st.download_button(
-                    label="📥 Baixar PDF",
+                    label="📥 Baixar PDF do Estudo",
                     data=pdf_bytes,
-                    file_name="conversa_estudo.pdf",
+                    file_name="historico_estudo.pdf",
                     mime="application/pdf"
                 )
 
@@ -93,12 +89,6 @@ def study_mode(knowledge_base):
                     timestamp=datetime.datetime.now()
                 ))
                 st.rerun()
-
-       # st.subheader("📊 Status do Sistema")
-       # st.success("✅ Base Local Ativa")
-       # st.warning("⚠️ IA Externa Desabilitada")
-       # st.info("📡 Modo Offline Disponível")
-
 
 # 🔍 Lógica de busca de conteúdo e registro da interação no banco
 def find_answer(question: str, knowledge_base: dict) -> str:

@@ -1,10 +1,10 @@
 from io import BytesIO
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 
-def gerar_pdf(conteudo, titulo="Conteúdo Exportado"):
+def gerar_pdf_chat(messages, titulo="Histórico de Estudo"):
     buffer = BytesIO()
     doc = SimpleDocTemplate(
         buffer,
@@ -16,17 +16,14 @@ def gerar_pdf(conteudo, titulo="Conteúdo Exportado"):
     )
 
     styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(name="Body", fontSize=12, leading=16, spaceAfter=12))
+    styles.add(ParagraphStyle(name="Chat", fontSize=12, leading=16, spaceAfter=12))
 
-    story = []
+    story = [Paragraph(f"<b>{titulo}</b>", styles["Title"]), Spacer(1, 12)]
 
-    # Título
-    story.append(Paragraph(f"<b>{titulo}</b>", styles["Title"]))
-    story.append(Spacer(1, 12))
-
-    # Conteúdo com formatação
-    for linha in conteudo.strip().split("\n"):
-        story.append(Paragraph(linha.strip(), styles["Body"]))
+    for msg in messages:
+        autor = "Você" if msg.type == "user" else "VestibulandoBot"
+        texto = f"<b>{autor}:</b> {msg.content}"
+        story.append(Paragraph(texto, styles["Chat"]))
 
     doc.build(story)
     pdf = buffer.getvalue()
