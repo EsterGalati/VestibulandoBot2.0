@@ -76,6 +76,8 @@ class VestibulandoBot:
             if "usuario_nome" in st.session_state:
                 st.markdown(f"👤 **Usuário:** {st.session_state.usuario_nome}")
                 if st.button("🔒 Sair"):
+                    if "usuario_id" in st.session_state:
+                        db.encerrar_sessao(st.session_state["usuario_id"])
                     for key in list(st.session_state.keys()):
                         del st.session_state[key]
                     st.rerun()

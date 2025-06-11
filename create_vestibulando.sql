@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS sessoes (
     usuario_id INTEGER NOT NULL,
     inicio DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    ALTER TABLE sessoes ADD COLUMN fim DATETIME;
+
 );
 
 -- Tabela de estatísticas por matéria

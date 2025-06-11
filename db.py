@@ -37,6 +37,19 @@ def iniciar_sessao(usuario_id):
     conn.commit()
     conn.close()
 
+def encerrar_sessao(usuario_id):
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE sessoes
+        SET fim = CURRENT_TIMESTAMP
+        WHERE usuario_id = ? AND fim IS NULL
+        ORDER BY inicio DESC
+        LIMIT 1
+    """, (usuario_id,))
+    conn.commit()
+    conn.close()
+
 def total_sessoes():
     conn = conectar()
     cursor = conn.cursor()
@@ -222,7 +235,13 @@ def inserir_questao(subject, difficulty, question, options, correct_answer, expl
     cursor.execute("""
         INSERT INTO questoes (subject, difficulty, question, options, correct_answer, explanation, tags)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (subject, difficulty, question, options, correct_answer, explanation, tags))
+    """, (
+        subject, difficulty, question,
+        json.dumps(options, ensure_ascii=False),
+        correct_answer,
+        explanation,
+        json.dumps(tags, ensure_ascii=False)
+    ))
     conn.commit()
     conn.close()
 
@@ -234,19 +253,3 @@ def total_usuarios():
     resultado = cursor.fetchone()[0]
     conn.close()
     return resultado
-
-def inserir_questao(subject, difficulty, question, options, correct_answer, explanation, tags):
-    conn = conectar()
-    cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO questoes (subject, difficulty, question, options, correct_answer, explanation, tags)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (
-        subject, difficulty, question,
-        json.dumps(options, ensure_ascii=False),
-        correct_answer,
-        explanation,
-        json.dumps(tags, ensure_ascii=False)
-    ))
-    conn.commit()
-    conn.close()
