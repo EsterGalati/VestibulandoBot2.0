@@ -134,15 +134,16 @@ def obter_estatisticas_por_materia(usuario_id):
     return data
 
 # Histórico de respostas
-def registrar_resposta(usuario_id, questao_id, materia, acertou):
+def registrar_resposta(usuario_id, questao_id, materia, acertou, simulado_id=None):
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO historico_respostas (usuario_id, questao_id, materia, acertou)
-        VALUES (?, ?, ?, ?)
-    """, (usuario_id, questao_id, materia, acertou))
+        INSERT INTO historico_respostas (usuario_id, questao_id, materia, acertou, simulado_id)
+        VALUES (?, ?, ?, ?, ?)
+    """, (usuario_id, questao_id, materia, acertou, simulado_id))
     conn.commit()
     conn.close()
+
 
 def total_respostas():
     conn = conectar()
@@ -265,3 +266,49 @@ def total_usuarios():
     resultado = cursor.fetchone()[0]
     conn.close()
     return resultado
+# Questão atual em andamento (Modo Desafio)
+def salvar_questao_em_andamento(usuario_id, questao_id):
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO sessao_usuario (usuario_id, questao_atual_id)
+        VALUES (?, ?)
+        ON CONFLICT(usuario_id)
+        DO UPDATE SET questao_atual_id = excluded.questao_atual_id
+    """, (usuario_id, questao_id))
+    conn.commit()
+    conn.close()
+
+def carregar_questao_em_andamento(usuario_id):
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT questao_atual_id FROM sessao_usuario WHERE usuario_id = ?
+    """, (usuario_id,))
+    resultado = cursor.fetchone()
+    conn.close()
+    return resultado[0] if resultado else None
+
+def estatisticas_por_simulado():
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT s.nome, COUNT(hr.id) AS total, SUM(hr.acertou) AS acertos
+        FROM historico_respostas hr
+        JOIN simulados s ON hr.simulado_id = s.id
+        GROUP BY s.nome
+        ORDER BY s.nome
+    """)
+    dados = cursor.fetchall()
+    conn.close()
+    return dados
+# Listar simulados disponíveis
+def listar_simulados():
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, nome FROM simulados ORDER BY criado_em DESC
+    """)
+    simulados = cursor.fetchall()
+    conn.close()
+    return simulados

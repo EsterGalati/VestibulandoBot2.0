@@ -42,6 +42,28 @@ def admin_panel(questions_bank):
         st.info("Ainda não há estatísticas registradas.")
 
     st.markdown("---")
+    st.subheader("🧪 Estatísticas por Simulado")
+
+    estat_simulados = db.estatisticas_por_simulado()  # Função que você deve garantir no db.py
+    if estat_simulados:
+        df_sim = pd.DataFrame(estat_simulados, columns=["Simulado", "Total Respondidas", "Acertos"])
+        df_sim["Aproveitamento (%)"] = round((df_sim["Acertos"] / df_sim["Total Respondidas"]) * 100, 1)
+
+        st.dataframe(
+            df_sim.style.format({"Aproveitamento (%)": "{:.1f}%"}),
+            use_container_width=True
+        )
+
+        fig_sim, ax_sim = plt.subplots(figsize=(6, 4))
+        ax_sim.barh(df_sim["Simulado"], df_sim["Aproveitamento (%)"], color="#4F46E5")
+        ax_sim.set_xlabel("Aproveitamento (%)")
+        ax_sim.set_title("Desempenho por Simulado")
+        st.pyplot(fig_sim)
+
+    else:
+        st.info("📭 Ainda não há respostas associadas a simulados.")
+
+    st.markdown("---")
     st.subheader("➕ Cadastrar Nova Questão")
 
     with st.form("nova_questao_form"):
