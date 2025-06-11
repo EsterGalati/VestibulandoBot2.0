@@ -40,15 +40,27 @@ def iniciar_sessao(usuario_id):
 def encerrar_sessao(usuario_id):
     conn = conectar()
     cursor = conn.cursor()
+
+    # Pega o ID da última sessão iniciada e ainda sem fim
     cursor.execute("""
-        UPDATE sessoes
-        SET fim = CURRENT_TIMESTAMP
+        SELECT id FROM sessoes
         WHERE usuario_id = ? AND fim IS NULL
         ORDER BY inicio DESC
         LIMIT 1
     """, (usuario_id,))
-    conn.commit()
+    sessao = cursor.fetchone()
+
+    if sessao:
+        sessao_id = sessao[0]
+        cursor.execute("""
+            UPDATE sessoes
+            SET fim = CURRENT_TIMESTAMP
+            WHERE id = ?
+        """, (sessao_id,))
+        conn.commit()
+
     conn.close()
+
 
 def total_sessoes():
     conn = conectar()
