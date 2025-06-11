@@ -94,10 +94,10 @@ def study_mode(knowledge_base):
                 ))
                 st.rerun()
 
-        st.subheader("📊 Status do Sistema")
-        st.success("✅ Base Local Ativa")
-        st.warning("⚠️ IA Externa Desabilitada")
-        st.info("📡 Modo Offline Disponível")
+       # st.subheader("📊 Status do Sistema")
+       # st.success("✅ Base Local Ativa")
+       # st.warning("⚠️ IA Externa Desabilitada")
+       # st.info("📡 Modo Offline Disponível")
 
 
 # 🔍 Lógica de busca de conteúdo e registro da interação no banco
