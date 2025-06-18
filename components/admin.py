@@ -44,7 +44,7 @@ def admin_panel(questions_bank):
     st.markdown("---")
     st.subheader("🧪 Estatísticas por Simulado")
 
-    estat_simulados = db.estatisticas_por_simulado()  # Função que você deve garantir no db.py
+    estat_simulados = db.estatisticas_por_simulado()  
     if estat_simulados:
         df_sim = pd.DataFrame(estat_simulados, columns=["Simulado", "Total Respondidas", "Acertos"])
         df_sim["Aproveitamento (%)"] = round((df_sim["Acertos"] / df_sim["Total Respondidas"]) * 100, 1)
