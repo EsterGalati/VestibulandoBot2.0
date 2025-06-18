@@ -7,11 +7,16 @@ import json
 def admin_panel(questions_bank):
     st.markdown('<div class="main-header"><h1>⚙️ Painel Administrativo</h1><p>Visualize estatísticas, usuários e gerencie o conteúdo</p></div>', unsafe_allow_html=True)
 
+    usuario_id = st.session_state.get("usuario_id")
+
     # VISÃO GERAL
     total_usuarios = db.total_usuarios()
     total_sessoes = db.total_sessoes()
     total_respostas = db.total_respostas()
-    estatisticas = db.estatisticas_gerais()
+
+    # Estatísticas filtradas por usuário logado
+    estatisticas = db.estatisticas_por_materia_usuario(usuario_id) if usuario_id else []
+    estat_simulados = db.estatisticas_por_simulado_usuario(usuario_id) if usuario_id else []
 
     st.subheader("📌 Visão Geral")
     col1, col2, col3 = st.columns(3)
@@ -44,7 +49,6 @@ def admin_panel(questions_bank):
     st.markdown("---")
     st.subheader("🧪 Estatísticas por Simulado")
 
-    estat_simulados = db.estatisticas_por_simulado()  
     if estat_simulados:
         df_sim = pd.DataFrame(estat_simulados, columns=["Simulado", "Total Respondidas", "Acertos"])
         df_sim["Aproveitamento (%)"] = round((df_sim["Acertos"] / df_sim["Total Respondidas"]) * 100, 1)
@@ -61,7 +65,7 @@ def admin_panel(questions_bank):
         st.pyplot(fig_sim)
 
     else:
-        st.info("📭 Ainda não há respostas associadas a simulados.")
+        st.info("👭 Ainda não há respostas associadas a simulados.")
 
     st.markdown("---")
     st.subheader("➕ Cadastrar Nova Questão")

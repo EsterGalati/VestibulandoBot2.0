@@ -89,12 +89,6 @@ class VestibulandoBot:
             )
 
             st.markdown("---")
-            st.subheader("🎯 Meta Diária")
-            value = min(50, st.session_state.session_stats['total'] * 10)
-            st.progress(value)
-            st.write(f"**{st.session_state.session_stats['total']}/10** questões hoje")
-
-            st.markdown("---")
             st.subheader("📡 Status")
             st.success("🟢 Online")
             st.write("*Última sync: agora*")

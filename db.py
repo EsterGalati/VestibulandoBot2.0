@@ -312,3 +312,31 @@ def listar_simulados():
     simulados = cursor.fetchall()
     conn.close()
     return simulados
+# Estatísticas por matéria para um usuário específico
+def estatisticas_por_materia_usuario(usuario_id):
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT materia, COUNT(*), SUM(acertou)
+        FROM historico_respostas
+        WHERE usuario_id = ?
+        GROUP BY materia
+    """, (usuario_id,))
+    dados = cursor.fetchall()
+    conn.close()
+    return dados
+
+# Estatísticas por simulado para um usuário específico
+def estatisticas_por_simulado_usuario(usuario_id):
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT s.nome, COUNT(hr.id), SUM(hr.acertou)
+        FROM historico_respostas hr
+        JOIN simulados s ON hr.simulado_id = s.id
+        WHERE hr.usuario_id = ?
+        GROUP BY s.nome
+    """, (usuario_id,))
+    resultados = cursor.fetchall()
+    conn.close()
+    return resultados
