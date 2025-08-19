@@ -1,0 +1,12 @@
+body{font-family:Arial,Helvetica,sans-serif;background:#f5f7fb;color:#2c3e50;margin:0}
+h1{text-align:center;margin:24px 0}
+.menu{display:flex;justify-content:center;gap:12px;margin:16px 0}
+.btn{background:#3498db;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px}
+.btn:hover{background:#2980b9}
+.link{color:#3498db;text-decoration:none}
+form{background:#fff;max-width:420px;margin:16px auto;padding:16px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.08)}
+label{display:block;margin:8px 0 4px}
+input[type="text"],input[type="password"]{width:100%;padding:10px;border:1px solid #dfe6e9;border-radius:6px}
+button{background:#2ecc71;border:none;color:#fff;padding:10px 16px;border-radius:8px;cursor:pointer;margin-top:10px}
+button:hover{background:#27ae60}
+.flash{max-width:420px;margin:16px auto;background:#fff3cd;color:#856404;border:1px solid #ffeeba;padding:10px;border-radius:8px}

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Resultado</title>
+</head>
+
+<body>
+    <h1>Resultado</h1>
+    <p>Sua resposta: {{ resposta_usuario }}</p>
+    <p>Resposta correta: {{ resposta_correta }}</p>
+
+    {% if correta %}
+    <p style="color: green;">Parabéns! Você acertou!</p>
+    {% else %}
+    <p style="color: red;">Ops! Você errou.</p>
+    {% endif %}
+
+    <a href="{{ url_for('modo_estudo') }}">Continuar estudando</a>
+    <a href="{{ url_for('modo_desafio') }}">Continuar simulado</a>
+</body>
+
+</html>

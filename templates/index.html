@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>VestibulandoBot</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  {% with msgs = get_flashed_messages() %}
+    {% if msgs %}
+      <div class="flash">{{ msgs[0] }}</div>
+    {% endif %}
+  {% endwith %}
+
+  <h1>VestibulandoBot</h1>
+  <div class="menu">
+    <a class="btn" href="{{ url_for('login_page') }}">Entrar</a>
+    <a class="btn" href="{{ url_for('cadastro_page') }}">Cadastrar</a>
+  </div>
+</body>
+</html>

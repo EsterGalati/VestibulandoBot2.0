@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Modo Estudo</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  {% with msgs = get_flashed_messages() %}
+    {% if msgs %}
+      <div class="flash">{{ msgs[0] }}</div>
+    {% endif %}
+  {% endwith %}
+
+  <h1>Modo Estudo</h1>
+
+  <form method="POST" action="{{ url_for('estudo') }}">
+    <label for="pergunta">Digite sua dúvida:</label>
+    <input type="text" id="pergunta" name="pergunta" required />
+    <button type="submit">Perguntar</button>
+  </form>
+
+  {% if pergunta %}
+    <div class="card">
+      <h3>Sua pergunta</h3>
+      <p>{{ pergunta }}</p>
+      <h3>Resposta</h3>
+      <p>{{ resposta }}</p>
+    </div>
+  {% endif %}
+
+  <div class="menu">
+    <a class="btn" href="{{ url_for('desafio') }}">Ir para Modo Desafio</a>
+    <a class="btn" href="{{ url_for('desempenho') }}">Ver desempenho</a>
+    <a class="btn" href="{{ url_for('logout') }}">Sair</a>
+  </div>
+</body>
+</html>

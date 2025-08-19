@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Modo Desafio</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  {% with msgs = get_flashed_messages() %}
+    {% if msgs %}
+      <div class="flash">{{ msgs[0] }}</div>
+    {% endif %}
+  {% endwith %}
+
+  <h1>Modo Desafio</h1>
+
+  {% if not questao %}
+    <div class="card">
+      <p>Não encontrei questões no banco. Já importou o CSV?</p>
+    </div>
+  {% else %}
+    <div class="card">
+      <h3>Pergunta ({{ questao.ano }})</h3>
+      <p>{{ questao.pergunta }}</p>
+
+      <form method="POST" action="{{ url_for('desafio') }}">
+        <input type="hidden" name="questao_id" value="{{ questao.id }}" />
+        <label><input type="radio" name="resposta" value="A" required> A) {{ questao.opcao_a }}</label><br>
+        <label><input type="radio" name="resposta" value="B"> B) {{ questao.opcao_b }}</label><br>
+        <label><input type="radio" name="resposta" value="C"> C) {{ questao.opcao_c }}</label><br>
+        <label><input type="radio" name="resposta" value="D"> D) {{ questao.opcao_d }}</label><br>
+        <label><input type="radio" name="resposta" value="E"> E) {{ questao.opcao_e }}</label><br>
+        <button type="submit">Enviar resposta</button>
+      </form>
+    </div>
+
+    {% if acertou is not none %}
+      <div class="card" style="margin-top:16px;">
+        <h3>Resultado</h3>
+        {% if acertou %}
+          <p style="color:green;">Acertou! 🎉</p>
+        {% else %}
+          <p style="color:#c0392b;">Errou 😕</p>
+          <p>Resposta correta: <b>{{ questao.resposta_correta }}</b></p>
+        {% endif %}
+        <a class="btn" href="{{ url_for('desafio') }}">Próxima questão</a>
+      </div>
+    {% endif %}
+  {% endif %}
+
+  <div class="menu" style="margin-top:16px;">
+    <a class="btn" href="{{ url_for('estudo') }}">Estudo</a>
+    <a class="btn" href="{{ url_for('desempenho') }}">Ver desempenho</a>
+    <a class="btn" href="{{ url_for('logout') }}">Sair</a>
+  </div>
+</body>
+</html>
