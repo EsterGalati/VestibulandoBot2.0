@@ -1,84 +1,113 @@
 <!doctype html>
 <html lang="pt-br">
-
 <head>
-    <meta charset="UTF-8" />
-    <title>Desempenho</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8" />
+  <title>Desempenho</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
-    <h1>Seu desempenho</h1>
+  <h1>Seu desempenho</h1>
 
-    {% if total == 0 %}
+  {% if total == 0 %}
     <div class="card">
-        <p>Você ainda não respondeu questões.</p>
-        <div class="menu">
-            <a class="btn" href="{{ url_for('desafio') }}">Ir para Modo Desafio</a>
-            <a class="btn" href="{{ url_for('estudo') }}">Ir para Modo Estudo</a>
-        </div>
+      <p>Você ainda não respondeu questões.</p>
+      <div class="menu">
+        <a class="btn" href="{{ url_for('desafio') }}">Ir para Modo Desafio</a>
+        <a class="btn" href="{{ url_for('estudo') }}">Ir para Modo Estudo</a>
+      </div>
     </div>
-    {% else %}
+  {% else %}
     <div class="card">
-        <h3>Resumo geral</h3>
-        <p><b>Total respondidas:</b> {{ total }}</p>
-        <p><b>Acertos:</b> {{ acertos }}</p>
-        <p><b>Precisão:</b> {{ percentual }}%</p>
-        <div class="menu">
-            <a class="btn" href="{{ url_for('desafio') }}">Praticar mais</a>
-        </div>
+      <h3>Resumo geral</h3>
+      <p><b>Total respondidas:</b> {{ total }}</p>
+      <p><b>Acertos:</b> {{ acertos }}</p>
+      <p><b>Precisão:</b> {{ percentual }}%</p>
+      <div class="menu">
+        <a class="btn" href="{{ url_for('desafio') }}">Praticar mais</a>
+      </div>
     </div>
 
     <div class="card">
-        <h3>Por ano</h3>
+      <h3>Por ano</h3>
+      <table style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Ano</th>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Total</th>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Acertos</th>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">%</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for linha in por_ano %}
+          <tr>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">{{ linha.ano }}</td>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">{{ linha.total }}</td>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">{{ linha.acertos }}</td>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">{{ linha.percentual }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Por assunto</h3>
+      {% if por_assunto %}
         <table style="width:100%; border-collapse: collapse;">
-            <thead>
-                <tr>
-                    <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Ano</th>
-                    <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Total</th>
-                    <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Acertos</th>
-                    <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">%</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for linha in por_ano %}
-                <tr>
-                    <td style="padding:8px; border-bottom:1px solid #f0f0f0;">{{ linha.ano }}</td>
-                    <td style="padding:8px; border-bottom:1px solid #f0f0f0;">{{ linha.total }}</td>
-                    <td style="padding:8px; border-bottom:1px solid #f0f0f0;">{{ linha.acertos }}</td>
-                    <td style="padding:8px; border-bottom:1px solid #f0f0f0;">{{ linha.percentual }}%</td>
-                </tr>
-                {% endfor %}
-            </tbody>
+          <thead>
+            <tr>
+              <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Assunto</th>
+              <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Total</th>
+              <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Acertos</th>
+              <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">%</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in por_assunto %}
+            <tr>
+              <td style="padding:8px; border-bottom:1px solid #f0f0f0;">{{ a.assunto }}</td>
+              <td style="padding:8px; border-bottom:1px solid #f0f0f0;">{{ a.total }}</td>
+              <td style="padding:8px; border-bottom:1px solid #f0f0f0;">{{ a.acertos }}</td>
+              <td style="padding:8px; border-bottom:1px solid #f0f0f0;">{{ a.percentual }}%</td>
+            </tr>
+            {% endfor %}
+          </tbody>
         </table>
+      {% else %}
+        <p>Ainda não há dados suficientes.</p>
+      {% endif %}
     </div>
 
     <div class="card">
-        <h3>Últimas respostas</h3>
+      <h3>Sugestões do que estudar mais</h3>
+      {% if sugestoes %}
         <ol>
-            {% for h in historico %}
-            <li style="margin:6px 0;">
-                <b>[{{ h.ano }} / Q{{ h.questao_id }}]</b>
-                {{ h.pergunta }}
-                <br>
-                Você marcou: <b>{{ h.resposta_usuario }}</b> —
-                Gabarito: <b>{{ h.gabarito }}</b> —
-                {% if h.acertou %}
-                <span style="color:green;">Acertou</span>
-                {% else %}
-                <span style="color:#c0392b;">Errou</span>
-                {% endif %}
+          {% for s in sugestoes %}
+            <li>
+              <b>{{ s.assunto }}</b> — {{ s.percentual }}% de acerto ({{ s.acertos }}/{{ s.total }})
             </li>
-            {% endfor %}
+          {% endfor %}
         </ol>
+        <p style="font-size:14px;opacity:.8;">* Lista baseada nos assuntos com menor percentual (min. 2 questões).</p>
+      {% else %}
+        <p>Responda mais questões para gerarmos sugestões personalizadas.</p>
+      {% endif %}
     </div>
-    {% endif %}
+  {% endif %}
 
-    <div class="menu">
-        <a class="btn" href="{{ url_for('desafio') }}">Desafio</a>
-        <a class="btn" href="{{ url_for('estudo') }}">Estudo</a>
-        <a class="btn" href="{{ url_for('logout') }}">Sair</a>
-    </div>
+  <div class="menu">
+    <a class="btn" href="{{ url_for('desafio') }}">Desafio</a>
+    <a class="btn" href="{{ url_for('estudo') }}">Estudo</a>
+    <a class="btn" href="{{ url_for('logout') }}">Sair</a>
+  </div>
+
+  <!-- ocultar mensagens flash após 3s -->
+  <script>
+    setTimeout(function(){
+      var el = document.querySelector('.flash');
+      if (el) el.style.display = 'none';
+    }, 3000);
+  </script>
 </body>
-
 </html>

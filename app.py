@@ -173,20 +173,95 @@ def desafio():
         ))
         db.session.commit()
 
-        return render_template('desafio.html', questao=questao, acertou=acertou)
+        # SÓ mostra o feedback após o POST
+        return render_template('desafio.html',
+                               questao=questao,
+                               acertou=acertou,
+                               show_feedback=True)
 
-    # GET: pega uma questão aleatória (aceita ?ano=2021 como filtro opcional)
+    # ---- GET: mostrar apenas a questão, SEM feedback ----
     ano = request.args.get('ano', type=int)
     query = QuestaoENEM.query
     if ano:
         query = query.filter_by(ano=ano)
     questao = query.order_by(db.func.random()).first()
 
-    return render_template('desafio.html', questao=questao)
+    return render_template('desafio.html',
+                           questao=questao,
+                           acertou=None,
+                           show_feedback=False)
 
 # (alias opcional, caso tenha links antigos)
 # app.add_url_rule('/modo_desafio', endpoint='modo_desafio', view_func=desafio, methods=['GET','POST'])
 
+def classificar_assunto(questao: "QuestaoENEM") -> str:
+    """Classifica um assunto de forma simples a partir do enunciado/opções."""
+    txt = " ".join([
+        (questao.pergunta or ""),
+        (questao.opcao_a or ""), (questao.opcao_b or ""),
+        (questao.opcao_c or ""), (questao.opcao_d or ""), (questao.opcao_e or "")
+    ]).lower()
+
+    regras = [
+        ("Química", [
+            "símbolo químico", "simbolo quimico", "tabela periódica", "tabela periodica",
+            "reação", "reacao", "equilíbrio químico", "equilibrio quimico", "mol", "ph",
+            "ácido", "base", "sal", "estequiometria"
+        ]),
+        ("Física", [
+            "força", "forca", "velocidade", "aceleração", "aceleracao", "energia",
+            "trabalho", "potência", "potencia", "movimento", "newton", "eletricidade",
+            "campo elétrico", "campo eletrico", "óptica", "optica", "ondas", "circuito"
+        ]),
+        ("Matemática", [
+            "equação", "equacao", "função", "funcao", "porcentagem", "probabilidade",
+            "estatística", "estatistica", "progressão", "progressao", "matriz", "logaritmo",
+            "derivada", "integral", "geometria", "triângulo", "triangulo", "área", "area",
+            "volume", "potenciação", "potenciacao", "fatoração", "fatoracao", "sistema linear"
+        ]),
+        ("Biologia", [
+            "célula", "celula", "dna", "rna", "mitose", "meiose", "ecologia", "ecossistema",
+            "fotossíntese", "fotossintese", "respiração celular", "respiracao celular",
+            "evolução", "evolucao", "bioma", "homeostase"
+        ]),
+        ("Geografia", [
+            "capital", "oceano", "continente", "clima", "bioma", "industrialização",
+            "globalização", "mapa", "latitude", "longitude", "demografia", "urbanização",
+            "relevo", "região", "regiao"
+        ]),
+        ("História", [
+            "independência", "independencia", "guerra", "revolução", "revolucao", "império",
+            "imperio", "ditadura", "era vargas", "primeira guerra", "segunda guerra",
+            "período colonial", "periodo colonial", "idade média", "idade media", "renascimento"
+        ]),
+        ("Português", [
+            "sintaxe", "morfologia", "ortografia", "acentuação", "acentuacao", "semântica",
+            "semantica", "voz passiva", "oração", "oracao", "sujeito", "predicado", "crase",
+            "coesão", "coerência", "interpret"
+        ]),
+        ("Literatura", [
+            "romantismo", "modernismo", "realismo", "simbolismo", "machado de assis",
+            "dom casmurro", "drummond", "clarice lispector", "oswald de andrade",
+            "mário de andrade", "mario de andrade", "camões", "camoes", "soneto"
+        ]),
+        ("Filosofia", [
+            "sócrates", "socrates", "platão", "platao", "aristóteles", "aristoteles",
+            "ética", "etica", "epistemologia", "metafísica", "metafisica", "kant", "nietzsche"
+        ]),
+        ("Sociologia", [
+            "marx", "durkheim", "weber", "cultura", "alienação", "alienacao",
+            "estratificação", "estratificacao", "movimentos sociais", "desigualdade"
+        ]),
+        ("Inglês", ["texto em inglês", "ingles"]),
+        ("Espanhol", ["texto em espanhol", "espanhol"]),
+        ("Artes", ["vanguarda", "expressionismo", "cubismo", "barroco", "renascentista"]),
+    ]
+
+    for assunto, chaves in regras:
+        for k in chaves:
+            if k in txt:
+                return assunto
+    return "Outros"
 
 # =========================================
 # Desempenho do usuário
@@ -223,29 +298,36 @@ def desempenho():
         "percentual": round(((r.acertos or 0) / r.total * 100), 2)
     } for r in por_ano_rows]
 
-    # Últimas 10 respostas
-    ultimas = db.session.query(ResultadoUsuario, QuestaoENEM)\
+    # ---- Quebra por ASSUNTO (classificação por palavra-chave) ----
+    rows = db.session.query(ResultadoUsuario, QuestaoENEM)\
         .join(QuestaoENEM, ResultadoUsuario.questao_id == QuestaoENEM.id)\
         .filter(ResultadoUsuario.usuario_id == current_user.id)\
-        .order_by(ResultadoUsuario.id.desc())\
-        .limit(10).all()
+        .all()
 
-    historico = [{
-        "questao_id": q.id,
-        "ano": q.ano,
-        "pergunta": q.pergunta,
-        "resposta_usuario": ru.resposta,
-        "gabarito": q.resposta_correta,
-        "acertou": ru.acertou
-    } for ru, q in ultimas]
+    by_assunto = {}
+    for ru, q in rows:
+        assunto = classificar_assunto(q)
+        s = by_assunto.setdefault(assunto, {"total": 0, "acertos": 0})
+        s["total"] += 1
+        s["acertos"] += 1 if ru.acertou else 0
+
+    por_assunto = []
+    for assunto, s in by_assunto.items():
+        pct = round((s["acertos"] / s["total"] * 100), 2) if s["total"] else 0.0
+        por_assunto.append({"assunto": assunto, "total": s["total"], "acertos": s["acertos"], "percentual": pct})
+
+    # Sugestões: assuntos com pior % (com pelo menos 2 tentativas)
+    candidatos = [x for x in por_assunto if x["total"] >= 2]
+    candidatos.sort(key=lambda x: (x["percentual"], -x["total"]))  # menor % primeiro
+    sugestoes = candidatos[:3] if candidatos else []
 
     return render_template('desempenho.html',
                            total=total,
                            acertos=acertos,
                            percentual=percentual,
                            por_ano=por_ano,
-                           historico=historico)
-
+                           por_assunto=por_assunto,
+                           sugestoes=sugestoes)
 
 # =========================================
 # Main

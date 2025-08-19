@@ -6,9 +6,17 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+
+  {# Flash (some após 3s) #}
   {% with msgs = get_flashed_messages() %}
     {% if msgs %}
-      <div class="flash">{{ msgs[0] }}</div>
+      <div class="flash" id="flash-msg">{{ msgs[0] }}</div>
+      <script>
+        setTimeout(function(){
+          var el = document.getElementById('flash-msg');
+          if (el) el.style.display = 'none';
+        }, 3000);
+      </script>
     {% endif %}
   {% endwith %}
 
@@ -17,24 +25,65 @@
   {% if not questao %}
     <div class="card">
       <p>Não encontrei questões no banco. Já importou o CSV?</p>
+      <div class="menu">
+        <a class="btn" href="{{ url_for('desempenho') }}">Ver desempenho</a>
+        <a class="btn" href="{{ url_for('logout') }}">Sair</a>
+      </div>
     </div>
   {% else %}
-    <div class="card">
-      <h3>Pergunta ({{ questao.ano }})</h3>
-      <p>{{ questao.pergunta }}</p>
 
-      <form method="POST" action="{{ url_for('desafio') }}">
-        <input type="hidden" name="questao_id" value="{{ questao.id }}" />
-        <label><input type="radio" name="resposta" value="A" required> A) {{ questao.opcao_a }}</label><br>
-        <label><input type="radio" name="resposta" value="B"> B) {{ questao.opcao_b }}</label><br>
-        <label><input type="radio" name="resposta" value="C"> C) {{ questao.opcao_c }}</label><br>
-        <label><input type="radio" name="resposta" value="D"> D) {{ questao.opcao_d }}</label><br>
-        <label><input type="radio" name="resposta" value="E"> E) {{ questao.opcao_e }}</label><br>
-        <button type="submit">Enviar resposta</button>
-      </form>
-    </div>
+    {# --- BLOCO: PERGUNTA + FORM (só no GET, antes de responder) --- #}
+    {% if not show_feedback %}
+      <div class="card">
+        <h3>Pergunta ({{ questao.ano }})</h3>
+        <p><b>Tempo:</b> <span id="tempo-restante">60</span>s</p>
+        <p>{{ questao.pergunta }}</p>
 
-    {% if acertou is not none %}
+        <form method="POST" action="{{ url_for('desafio') }}" data-quiz-form>
+          <input type="hidden" name="questao_id" value="{{ questao.id }}" />
+          <label><input type="radio" name="resposta" value="A" required> A) {{ questao.opcao_a }}</label><br>
+          <label><input type="radio" name="resposta" value="B"> B) {{ questao.opcao_b }}</label><br>
+          <label><input type="radio" name="resposta" value="C"> C) {{ questao.opcao_c }}</label><br>
+          <label><input type="radio" name="resposta" value="D"> D) {{ questao.opcao_d }}</label><br>
+          <label><input type="radio" name="resposta" value="E"> E) {{ questao.opcao_e }}</label><br>
+          <button type="submit">Enviar resposta</button>
+        </form>
+      </div>
+
+      <script>
+      (function(){
+        var total = 60; // ajuste o tempo aqui (segundos)
+        var el = document.getElementById('tempo-restante');
+        var form = document.querySelector('form[data-quiz-form]');
+        if (!el || !form) return;
+
+        el.textContent = total;
+        var tick = setInterval(function(){
+          total--;
+          el.textContent = total;
+          if (total <= 0){
+            clearInterval(tick);
+            // desabilita inputs e botão
+            form.querySelectorAll('input,button').forEach(function(e){ e.disabled = true; });
+            // mostra aviso + próxima
+            var msg = document.createElement('div');
+            msg.className = 'card';
+            msg.style.marginTop = '16px';
+            msg.innerHTML = '<h3>Tempo esgotado</h3><a class="btn" href="{{ url_for("desafio") }}">Próxima questão</a>';
+            form.parentNode.appendChild(msg);
+          }
+        }, 1000);
+      })();
+      </script>
+    {% endif %}
+
+    {# --- BLOCO: FEEDBACK (só depois do POST) --- #}
+    {% if show_feedback %}
+      <div class="card">
+        <h3>Pergunta ({{ questao.ano }})</h3>
+        <p>{{ questao.pergunta }}</p>
+      </div>
+
       <div class="card" style="margin-top:16px;">
         <h3>Resultado</h3>
         {% if acertou %}
@@ -46,6 +95,7 @@
         <a class="btn" href="{{ url_for('desafio') }}">Próxima questão</a>
       </div>
     {% endif %}
+
   {% endif %}
 
   <div class="menu" style="margin-top:16px;">
@@ -53,5 +103,6 @@
     <a class="btn" href="{{ url_for('desempenho') }}">Ver desempenho</a>
     <a class="btn" href="{{ url_for('logout') }}">Sair</a>
   </div>
+
 </body>
 </html>
