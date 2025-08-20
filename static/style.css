@@ -1,12 +1,212 @@
-body{font-family:Arial,Helvetica,sans-serif;background:#f5f7fb;color:#2c3e50;margin:0}
-h1{text-align:center;margin:24px 0}
-.menu{display:flex;justify-content:center;gap:12px;margin:16px 0}
-.btn{background:#3498db;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px}
-.btn:hover{background:#2980b9}
-.link{color:#3498db;text-decoration:none}
-form{background:#fff;max-width:420px;margin:16px auto;padding:16px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.08)}
-label{display:block;margin:8px 0 4px}
-input[type="text"],input[type="password"]{width:100%;padding:10px;border:1px solid #dfe6e9;border-radius:6px}
-button{background:#2ecc71;border:none;color:#fff;padding:10px 16px;border-radius:8px;cursor:pointer;margin-top:10px}
-button:hover{background:#27ae60}
-.flash{max-width:420px;margin:16px auto;background:#fff3cd;color:#856404;border:1px solid #ffeeba;padding:10px;border-radius:8px}
+:root{
+  --bg:#0b1020;
+  --bg-soft:#121832;
+  --card:#0f1730;
+  --muted:#97a0c3;
+  --text:#e9ecff;
+  --brand:#6c8cff;
+  --brand-2:#7af0d8;
+  --ok:#2ecc71;
+  --bad:#e74c3c;
+  --shadow: 0 10px 30px rgba(0,0,0,.3);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(1200px 600px at 10% 0%, #1b2a6b33, transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, #34e7c933, transparent 60%),
+    var(--bg);
+}
+
+/* Layout */
+.container{width:100%;max-width:1100px;margin:0 auto;padding:0 20px}
+.page-container{padding:32px 0}
+
+/* Navbar */
+.navbar{position:sticky;top:0;z-index:20;background:rgba(11,16,32,.8);backdrop-filter:saturate(160%) blur(10px);border-bottom:1px solid #1d264a}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{font-weight:800;color:#fff;text-decoration:none;letter-spacing:.3px}
+.brand span{color:var(--brand)}
+.nav-links{display:flex;gap:16px;align-items:center}
+.nav-links a{color:#dbe2ff;text-decoration:none;opacity:.9}
+.nav-links a:hover{opacity:1}
+
+/* Hero */
+.hero{padding:48px 0;border-bottom:1px solid #1d264a;background:linear-gradient(180deg, rgba(15,23,48,.6), rgba(15,23,48,0))}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:24px;align-items:center}
+.hero-copy h1{margin:0 0 8px;font-size:40px;line-height:1.1}
+.hero-copy p{margin:0 0 16px;color:var(--muted)}
+.hero-cta{display:flex;gap:12px}
+.hero-visual img{width:100%;max-height:320px;object-fit:contain}
+
+/* Cards, buttons */
+.card{
+  background:linear-gradient(180deg, rgba(20,30,64,.85), rgba(16,24,56,.85));
+  border:1px solid #1d264a;
+  border-radius:14px;
+  padding:18px 18px;
+  box-shadow:var(--shadow);
+}
+.btn{
+  display:inline-block; border:none; cursor:pointer;
+  background:linear-gradient(135deg, var(--brand), #82a1ff);
+  color:#fff; padding:10px 16px; border-radius:10px; text-decoration:none; font-weight:600
+}
+.btn:hover{filter:brightness(1.05)}
+.btn-ghost{
+  background:transparent; border:1px solid #2b396b; color:#c9d3ff
+}
+.btn-lg{padding:12px 18px; border-radius:12px}
+.btn-full{width:100%}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+
+/* Forms */
+.form{display:flex;flex-direction:column;gap:10px}
+.form input[type="text"],
+.form input[type="email"],
+.form input[type="password"]{
+  background:#0c132b;border:1px solid #1f2a55;border-radius:10px;padding:12px;color:#e9ecff;outline:none
+}
+.form input::placeholder{color:#8c95b7}
+
+/* Options (radio) */
+.options{margin-top:10px}
+.option{
+  display:flex;align-items:flex-start;gap:10px;
+  border:1px solid #223064;border-radius:12px;padding:12px;margin:10px 0;
+  cursor:pointer;background:#0b1430;
+}
+.option:hover{border-color:#2b3b7a}
+.option input{accent-color:var(--brand);margin-top:3px}
+.letter{
+  width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  background:#1a285a;border:1px solid #2a3b7c;font-weight:700
+}
+.opt-text{opacity:.95}
+
+/* Question header */
+.question-head{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:#0c173a;border:1px solid #24336a;color:#c7d3ff;
+  padding:6px 10px;border-radius:999px;font-size:13px
+}
+.pill-time{background:#0a1b2b;border-color:#1f3b55;color:#bfefff}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.kpi .kpi-label{color:var(--muted);font-size:12px}
+.kpi .kpi-value{font-weight:800;font-size:28px}
+
+/* Bars */
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:grid;grid-template-columns:140px 1fr 150px;gap:10px;align-items:center}
+.bar{height:10px;background:#0b1430;border:1px solid #1f2a55;border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg, var(--brand), var(--brand-2))}
+
+/* Chat bubbles */
+.bubble{padding:12px 14px;border-radius:14px;max-width:100%}
+.bubble.q{background:#0c173a;border:1px solid #24336a}
+.bubble.a{background:#0a1b2b;border:1px solid #1f3b55}
+
+/* Grids */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:24px 0}
+.feature-card{background:linear-gradient(180deg, rgba(20,30,64,.7), rgba(16,24,56,.7));border:1px solid #1d264a;border-radius:14px;padding:16px}
+
+/* Auth */
+.auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:center}
+.auth-card h2{margin-top:0}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+
+/* Footer */
+.footer{border-top:1px solid #1d264a;margin-top:40px}
+.footer-inner{padding:14px 0;color:#9aa3c7;font-size:14px;text-align:center}
+
+/* Toast */
+.toast{
+  position:fixed;right:20px;top:76px;z-index:30;
+  background:#0d1a3a;border:1px solid #24336a;border-radius:12px;
+  padding:12px 14px;box-shadow:var(--shadow);transition:all .25s ease;color:#dfe6ff
+}
+.toast.hide{opacity:0;transform:translateY(-8px)}
+
+/* Page title */
+.page-title{margin-top:0;margin-bottom:14px}
+
+/* Responsive */
+@media (max-width: 960px){
+  .hero-grid, .grid-2, .features, .auth-grid { grid-template-columns:1fr; }
+  .bar-row{grid-template-columns:100px 1fr 110px}
+  .nav-links{gap:10px}
+}
+
+/* --- Botões refinados --- */
+.btn {
+  display:inline-block; border:none; cursor:pointer;
+  background:linear-gradient(135deg, var(--brand), #82a1ff);
+  color:#fff; padding:12px 18px; border-radius:12px; text-decoration:none; font-weight:700;
+  transition:transform .06s ease, filter .15s ease;
+  text-align:center;
+}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:scale(0.98)}
+.btn-lg{padding:14px 20px; border-radius:14px; font-size:16px}
+.btn-full{width:100%}
+
+.btn-ghost{
+  background:transparent; border:1px solid #2b396b; color:#c9d3ff;
+}
+.btn-ghost:hover{background:#0f1730}
+
+/* --- Telas de autenticação centralizadas --- */
+.auth-grid{
+  display:grid;
+  grid-template-columns: minmax(320px, 420px);
+  justify-content:center; align-items:center;
+  gap:24px; min-height: calc(100vh - 180px);
+}
+.auth-card{
+  max-width:420px; width:100%;
+  margin:0 auto;
+}
+.auth-visual{
+  display:none; /* esconde a ilustração em telas menores para focar no formulário */
+  text-align:center;
+}
+.auth-visual img{max-width:360px; width:100%; opacity:.95}
+
+/* Em telas maiores, mostramos a ilustração ao lado e mantemos tudo centralizado */
+@media (min-width: 1024px){
+  .auth-grid{
+    grid-template-columns: minmax(320px, 420px) 1fr;
+    justify-content:center;
+  }
+  .auth-visual{display:block}
+}
+
+/* --- Formulários mais elegantes --- */
+.form{
+  display:flex; flex-direction:column; gap:12px;
+}
+.form label{font-weight:600}
+.form input[type="text"],
+.form input[type="email"],
+.form input[type="password"]{
+  background:#0c132b; border:1px solid #24336a; border-radius:12px;
+  padding:12px 14px; color:#e9ecff; outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.form input:focus{
+  border-color:#4967ff;
+  box-shadow:0 0 0 3px rgba(105,137,255,.18);
+}
+
+/* --- Ajustes no modo estudo para destacar o botão --- */
+.estudo-card .form .btn { width:100%; }   /* Enviar pergunta ocupa toda a largura */

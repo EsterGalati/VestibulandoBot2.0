@@ -1,0 +1,54 @@
+# === Python geral ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+build/
+dist/
+*.log
+
+# === Ambientes virtuais (não versionar) ===
+venv/
+.venv/
+env/
+ENV/
+
+# === Flask / SQLite ===
+instance/
+*.sqlite3
+*.db
+*.db-journal
+
+# === Configs locais / segredos ===
+.env
+*.env
+.env.*
+
+# === Tests / coverage ===
+.pytest_cache/
+.coverage
+.coverage.*
+.cache/
+htmlcov/
+
+# === IDE / Editor ===
+.vscode/
+.idea/
+*.code-workspace
+
+# === SO (lixo do sistema) ===
+.DS_Store
+Thumbs.db
+
+# === Dados (opcional) ===
+# Se seu CSV for grande, ignore a pasta inteira:
+# data/
+# Ou só ignore CSVs grandes:
+# data/*.csv
+# …mas mantenha estes arquivos pequenos no repo:
+# !data/README.md
+# !data/enem_questoes.csv

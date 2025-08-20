@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
@@ -6,20 +5,40 @@ from flask_login import (
     login_required, current_user, UserMixin
 )
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy import func, case
+from sqlalchemy import func, case, text
+
+# .env
+import os
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv(*args, **kwargs):
+        pass
+load_dotenv()
 
 # =========================================
 # Configuração Flask + Banco
 # =========================================
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///vestibulando.db'  # mantenha igual no popular_questoes.py
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///vestibulando.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'troque-esta-chave'  # mude para um valor seguro em produção
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'troque-esta-chave')
 
 db = SQLAlchemy(app)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login_page'  # rota usada quando precisa logar
+login_manager.login_message = 'Faça login para acessar.'
+login_manager.login_message_category = 'info'
+
+
+# Evita cache do navegador (especialmente no /desafio com feedback)
+@app.after_request
+def add_no_cache_headers(resp):
+    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    resp.headers['Pragma'] = 'no-cache'
+    resp.headers['Expires'] = '0'
+    return resp
 
 
 # =========================================
@@ -128,20 +147,29 @@ def logout():
 
 
 # =========================================
-# Modo Estudo
+# Modo Estudo (com IA)
 # =========================================
+# Importa IA com fallback para não quebrar o app
+try:
+    from ai_client import responder_duvida
+except Exception as _e:
+    def responder_duvida(pergunta: str) -> str:
+        return ("⚠️ IA indisponível: configure OPENAI_API_KEY no .env e "
+                "crie o arquivo ai_client.py conforme instruções.")
+
 @app.route('/estudo', methods=['GET', 'POST'])
 @login_required
 def estudo():
     if request.method == 'POST':
-        pergunta = request.form.get('pergunta', '')
-        # Aqui você pode integrar com uma IA. Por ora, simulamos:
-        resposta = f"Resposta simulada para: {pergunta}"
-        return render_template('estudo.html', pergunta=pergunta, resposta=resposta)
-    return render_template('estudo.html')
+        pergunta = request.form.get('pergunta', '').strip()
+        if not pergunta:
+            flash('Digite sua dúvida.')
+            return redirect(url_for('estudo'))
 
-# (alias opcional, caso tenha links antigos)
-# app.add_url_rule('/modo_estudo', endpoint='modo_estudo', view_func=estudo, methods=['GET','POST'])
+        resposta = responder_duvida(pergunta)
+        return render_template('estudo.html', pergunta=pergunta, resposta=resposta)
+
+    return render_template('estudo.html')
 
 
 # =========================================
@@ -184,7 +212,7 @@ def desafio():
     query = QuestaoENEM.query
     if ano:
         query = query.filter_by(ano=ano)
-    questao = query.order_by(db.func.random()).first()
+    questao = query.order_by(func.random()).first()  # padronizado
 
     return render_template('desafio.html',
                            questao=questao,
@@ -194,6 +222,10 @@ def desafio():
 # (alias opcional, caso tenha links antigos)
 # app.add_url_rule('/modo_desafio', endpoint='modo_desafio', view_func=desafio, methods=['GET','POST'])
 
+
+# =========================================
+# Classificador simples de assunto
+# =========================================
 def classificar_assunto(questao: "QuestaoENEM") -> str:
     """Classifica um assunto de forma simples a partir do enunciado/opções."""
     txt = " ".join([
@@ -262,6 +294,7 @@ def classificar_assunto(questao: "QuestaoENEM") -> str:
             if k in txt:
                 return assunto
     return "Outros"
+
 
 # =========================================
 # Desempenho do usuário

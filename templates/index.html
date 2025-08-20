@@ -1,21 +1,38 @@
-<!doctype html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <title>VestibulandoBot</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-  {% with msgs = get_flashed_messages() %}
-    {% if msgs %}
-      <div class="flash">{{ msgs[0] }}</div>
-    {% endif %}
-  {% endwith %}
+{% extends "base.html" %}
+{% block title %}Início — VestibulandoBot{% endblock %}
 
-  <h1>VestibulandoBot</h1>
-  <div class="menu">
-    <a class="btn" href="{{ url_for('login_page') }}">Entrar</a>
-    <a class="btn" href="{{ url_for('cadastro_page') }}">Cadastrar</a>
+{% block hero %}
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <h1>Estude com foco. Pratique com propósito.</h1>
+      <p>Modo estudo para tirar dúvidas e modo desafio com questões do ENEM. Acompanhe seu desempenho e descubra o que estudar mais.</p>
+      <div class="hero-cta">
+        <a class="btn btn-lg" href="{{ url_for('cadastro_page') }}">Começar agora</a>
+        <a class="btn btn-ghost btn-lg" href="{{ url_for('login_page') }}">Já tenho conta</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <!-- Coloque uma imagem em static/img/hero-study.svg ou hero.png -->
+      <img src="{{ url_for('static', filename='img/hero-study.svg') }}" alt="Estudo" onerror="this.style.display='none'">
+    </div>
   </div>
-</body>
-</html>
+</section>
+{% endblock %}
+
+{% block content %}
+<section class="features">
+  <div class="feature-card">
+    <h3>Modo Estudo</h3>
+    <p>Tire dúvidas rapidamente para não perder ritmo.</p>
+  </div>
+  <div class="feature-card">
+    <h3>Modo Desafio</h3>
+    <p>Questões reais do ENEM com feedback imediato.</p>
+  </div>
+  <div class="feature-card">
+    <h3>Desempenho</h3>
+    <p>Veja seus acertos por ano e assunto, e foque no que importa.</p>
+  </div>
+</section>
+{% endblock %}

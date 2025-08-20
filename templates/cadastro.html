@@ -1,29 +1,24 @@
-<!doctype html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <title>Cadastro - VestibulandoBot</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-  {% with msgs = get_flashed_messages() %}
-    {% if msgs %}
-      <div class="flash">{{ msgs[0] }}</div>
-    {% endif %}
-  {% endwith %}
+{% extends "base.html" %}
+{% block title %}Cadastrar — VestibulandoBot{% endblock %}
 
-  <h1>Cadastro</h1>
-  <form method="POST" action="{{ url_for('cadastro_post') }}">
-    <label>E-mail</label>
-    <input type="text" name="email" required />
-    <label>Senha</label>
-    <input type="password" name="senha" required />
-    <button type="submit">Cadastrar</button>
-  </form>
-
-  <div class="menu">
-    <a class="link" href="{{ url_for('login_page') }}">Já tem conta? Entre</a>
-    <a class="link" href="{{ url_for('index') }}">← Voltar</a>
+{% block content %}
+<div class="auth-grid">
+  <div class="auth-card card">
+    <h2 style="margin-top:0">Criar conta</h2>
+    <form method="POST" action="{{ url_for('cadastro_post') }}" class="form">
+      <label>E-mail</label>
+      <input type="email" name="email" placeholder="seu@email.com" required>
+      <label>Senha</label>
+      <input type="password" name="senha" placeholder="Crie uma senha" required>
+      <button class="btn btn-lg btn-full" type="submit">Cadastrar</button>
+      <p class="muted" style="margin:6px 0 0">Já tem conta?
+        <a href="{{ url_for('login_page') }}">Entrar</a>
+      </p>
+    </form>
   </div>
-</body>
-</html>
+
+  <div class="auth-visual">
+    <img src="{{ url_for('static', filename='img/signup-illustration.svg') }}" alt="" onerror="this.style.display='none'">
+  </div>
+</div>
+{% endblock %}

@@ -1,38 +1,24 @@
-<!doctype html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <title>Modo Estudo</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-  {% with msgs = get_flashed_messages() %}
-    {% if msgs %}
-      <div class="flash">{{ msgs[0] }}</div>
-    {% endif %}
-  {% endwith %}
+{% extends "base.html" %}
+{% block title %}Modo Estudo — VestibulandoBot{% endblock %}
 
-  <h1>Modo Estudo</h1>
-
-  <form method="POST" action="{{ url_for('estudo') }}">
-    <label for="pergunta">Digite sua dúvida:</label>
-    <input type="text" id="pergunta" name="pergunta" required />
-    <button type="submit">Perguntar</button>
-  </form>
+{% block content %}
+<div class="grid-2">
+  <div class="card estudo-card">
+    <h2>Modo Estudo</h2>
+    <form method="POST" action="{{ url_for('estudo') }}" class="form">
+      <label>Sua dúvida</label>
+      <input type="text" name="pergunta" placeholder="Ex.: Como calcular probabilidade?" required>
+      <button class="btn btn-lg btn-full" type="submit">Enviar pergunta</button>
+    </form>
+  </div>
 
   {% if pergunta %}
-    <div class="card">
-      <h3>Sua pergunta</h3>
-      <p>{{ pergunta }}</p>
-      <h3>Resposta</h3>
-      <p>{{ resposta }}</p>
-    </div>
-  {% endif %}
-
-  <div class="menu">
-    <a class="btn" href="{{ url_for('desafio') }}">Ir para Modo Desafio</a>
-    <a class="btn" href="{{ url_for('desempenho') }}">Ver desempenho</a>
-    <a class="btn" href="{{ url_for('logout') }}">Sair</a>
+  <div class="card">
+    <h3>Sua pergunta</h3>
+    <div class="bubble q">{{ pergunta }}</div>
+    <h3>Resposta</h3>
+    <div class="bubble a">{{ resposta }}</div>
   </div>
-</body>
-</html>
+  {% endif %}
+</div>
+{% endblock %}
