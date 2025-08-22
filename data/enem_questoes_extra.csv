@@ -1,0 +1,150 @@
+# popular_questoes.py
+import csv
+import sys
+import os
+from typing import List, Dict
+
+# importa o app e os modelos já configurados (usa o mesmo DB do app)
+from app import app, db, QuestaoENEM
+from sqlalchemy import text
+
+REQUIRED_COLS = [
+    "ano", "pergunta",
+    "opcao_a", "opcao_b", "opcao_c", "opcao_d", "opcao_e",
+    "resposta_correta"
+]
+
+def norm_letter(x: str) -> str:
+    x = (x or "").strip().upper()
+    return x[0] if x and x[0] in "ABCDE" else ""
+
+def clean_text(x: str) -> str:
+    # limpa espaços excessivos; preserva quebras de linha (perguntas longas)
+    if x is None:
+        return ""
+    # normaliza quebra de linha Windows -> \n
+    x = x.replace("\r\n", "\n").replace("\r", "\n")
+    # tira espaços nas extremidades de cada linha
+    x = "\n".join([ln.strip() for ln in x.split("\n")])
+    return x.strip()
+
+def read_csv_rows(path: str) -> List[Dict]:
+    with open(path, "r", encoding="utf-8-sig", newline="") as f:
+        reader = csv.DictReader(f)
+        cols = [c.strip() for c in (reader.fieldnames or [])]
+        missing = [c for c in REQUIRED_COLS if c not in cols]
+        if missing:
+            raise RuntimeError(f"[{path}] faltam colunas: {missing}")
+
+        rows = []
+        for i, r in enumerate(reader, start=2):
+            try:
+                ano = int(str(r["ano"]).strip())
+            except Exception:
+                print(f"  ! Linha {i}: ano inválido -> {r.get('ano')}")
+                continue
+
+            row = {
+                "ano": ano,
+                "pergunta": clean_text(r["pergunta"]),
+                "opcao_a": clean_text(r["opcao_a"]),
+                "opcao_b": clean_text(r["opcao_b"]),
+                "opcao_c": clean_text(r["opcao_c"]),
+                "opcao_d": clean_text(r["opcao_d"]),
+                "opcao_e": clean_text(r["opcao_e"]),
+                "resposta_correta": norm_letter(r["resposta_correta"]),
+                "_source": os.path.basename(path),
+                "_line": i,
+            }
+            ok = row["pergunta"] and all(row[k] for k in ["opcao_a","opcao_b","opcao_c","opcao_d","opcao_e"]) and row["resposta_correta"]
+            if not ok:
+                print(f"  ! Linha {i}: campos obrigatórios vazios no arquivo {path}")
+                continue
+            rows.append(row)
+        return rows
+
+def load_files(filepaths: List[str], replace: bool = False) -> None:
+    with app.app_context():
+        if replace:
+            # cuidado: apaga a tabela e recria
+            print(">> RECRIANDO tabela questoes_enem ...")
+            db.session.execute(text("DELETE FROM resultado_usuario"))  # limpa dependentes primeiro
+            db.session.execute(text("DELETE FROM questoes_enem"))
+            db.session.commit()
+
+        # cache de perguntas existentes para evitar duplicatas (por pergunta exata)
+        existing = set(x for (x,) in db.session.query(QuestaoENEM.pergunta).all())
+        print(f">> já existem {len(existing)} perguntas no banco")
+
+        all_rows: List[Dict] = []
+        for p in filepaths:
+            if not os.path.isfile(p):
+                print(f"  ! arquivo não encontrado: {p}")
+                continue
+            print(f">> lendo {p} ...")
+            rows = read_csv_rows(p)
+            print(f"   - {len(rows)} linhas válidas")
+            all_rows.extend(rows)
+
+        if not all_rows:
+            print("Nenhuma linha válida encontrada.")
+            return
+
+        # filtra duplicatas por pergunta (comparação literal)
+        new_rows = [r for r in all_rows if r["pergunta"] not in existing]
+        dups = len(all_rows) - len(new_rows)
+        if dups:
+            print(f"   - {dups} duplicata(s) ignoradas (mesma pergunta)")
+
+        # cria objetos e insere em lotes
+        objs = []
+        for r in new_rows:
+            objs.append(QuestaoENEM(
+                ano=r["ano"],
+                pergunta=r["pergunta"],
+                opcao_a=r["opcao_a"],
+                opcao_b=r["opcao_b"],
+                opcao_c=r["opcao_c"],
+                opcao_d=r["opcao_d"],
+                opcao_e=r["opcao_e"],
+                resposta_correta=r["resposta_correta"]
+            ))
+
+        if not objs:
+            print("Nenhuma questão nova para inserir.")
+            return
+
+        print(f">> inserindo {len(objs)} novas questão(ões) ...")
+        # em lotes para reduzir overhead
+        BATCH = 500
+        for i in range(0, len(objs), BATCH):
+            db.session.add_all(objs[i:i+BATCH])
+            db.session.commit()
+            print(f"   - commit {i+BATCH if i+BATCH<len(objs) else len(objs)}/{len(objs)}")
+
+        total = db.session.query(QuestaoENEM).count()
+        print(f">> pronto! total agora: {total} questões")
+
+if __name__ == "__main__":
+    # uso:
+    #   python popular_questoes.py                 (usa CSVs padrão)
+    #   python popular_questoes.py data/minhas.csv (um ou mais arquivos)
+    #   python popular_questoes.py --replace       (recria tabela e importa)
+    args = sys.argv[1:]
+    replace = False
+    files = []
+
+    if "--replace" in args:
+        replace = True
+        args = [a for a in args if a != "--replace"]
+
+    if args:
+        files = args
+    else:
+        files = [
+            os.path.join("data", "enem_questoes.csv"),
+            os.path.join("data", "enem_questoes_extra.csv"),
+        ]
+
+    print("Arquivos a importar:", files)
+    load_files(files, replace=replace)
