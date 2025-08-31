@@ -13,7 +13,7 @@ def register():
         return jsonify(body), code
     except ValueError as e:
         msg = str(e)
-        code = 409 if msg == "email_ja_cadastrado" else 400
+        code = 409 if msg == "email já foi cadastrado" else 400
         return jsonify({"error": msg}), code
 
 
