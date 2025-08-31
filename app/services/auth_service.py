@@ -16,7 +16,7 @@ def register(email: str, senha: str) -> Usuario:
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
-        raise ValueError("email_ja_cadastrado")
+        raise ValueError("email já foi cadastrado")
     return user
 
 

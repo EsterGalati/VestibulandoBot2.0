@@ -7,13 +7,10 @@ import os
 try:
     from dotenv import load_dotenv
 except Exception:
-    def load_dotenv(*args, **kwargs):  # fallback no-op
+    def load_dotenv(*args, **kwargs):
         return False
 
-from .extensions import db, login_manager
-from .routes.auth import bp as auth_bp
-from .routes.desafio import bp as desafio_bp
-from .routes.desempenho import bp as desempenho_bp
+from .extensions import db, login_manager, oauth
 
 # registra CLI se o módulo existir
 try:
@@ -34,8 +31,6 @@ def create_app(config_object: str | None = None) -> Flask:
         app.config.from_object(config_object)
 
     # Cookies por ambiente
-    # DEV (default): mesmo host em portas diferentes -> Lax/False
-    # PROD (ENV=prod): domínios diferentes com HTTPS -> None/True
     env = os.getenv("ENV", "dev").lower()
     if env == "prod":
         app.config.update(
@@ -54,15 +49,30 @@ def create_app(config_object: str | None = None) -> Flask:
 
     # CORS (habilita cookies; origens configuráveis via env)
     # Ex.: CORS_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
-    cors_origins = os.getenv(
-        "CORS_ORIGINS",
-        "http://127.0.0.1:5173,http://localhost:5173",
-    ).split(",")
+    cors_origins = [
+        o.strip() for o in os.getenv(
+            "CORS_ORIGINS",
+            "http://127.0.0.1:5173,http://localhost:5173",
+        ).split(",") if o.strip()
+    ]
     CORS(
         app,
         supports_credentials=True,
         resources={r"/api/*": {"origins": cors_origins}},
     )
+
+    # OAuth (Authlib)
+    oauth.init_app(app)
+    oauth.register(
+    name="google",
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    # Descoberta OIDC (traz jwks_uri, token_endpoint, userinfo_endpoint, etc.)
+    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+    # Base para chamadas .get("userinfo") etc.
+    api_base_url="https://openidconnect.googleapis.com/v1/",
+    client_kwargs={"scope": "openid email profile"},
+)
 
     # Flask-Login
     from .models.usuario import Usuario
@@ -71,7 +81,11 @@ def create_app(config_object: str | None = None) -> Flask:
     def load_user(user_id: str):
         return db.session.get(Usuario, int(user_id))
 
-    # Blueprints (API)
+    # Blueprints (API) — importe SÓ AQUI para evitar ciclo
+    from .routes.auth import bp as auth_bp
+    from .routes.desafio import bp as desafio_bp
+    from .routes.desempenho import bp as desempenho_bp
+
     app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
     app.register_blueprint(desafio_bp, url_prefix="/api/v1/desafio")
     app.register_blueprint(desempenho_bp, url_prefix="/api/v1/desempenho")
