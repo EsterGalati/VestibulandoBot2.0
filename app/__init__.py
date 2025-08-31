@@ -1,3 +1,4 @@
+# app/__init__.py
 from flask import Flask, jsonify
 from flask_cors import CORS
 import os
@@ -25,29 +26,42 @@ def create_app(config_object: str | None = None) -> Flask:
     load_dotenv()
     app = Flask(__name__)
 
-    # Config
+    # Config base
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "troque-esta-chave")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///vestibulando.db")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     if config_object:
         app.config.from_object(config_object)
 
+    # Cookies por ambiente
+    # DEV (default): mesmo host em portas diferentes -> Lax/False
+    # PROD (ENV=prod): domínios diferentes com HTTPS -> None/True
+    env = os.getenv("ENV", "dev").lower()
+    if env == "prod":
+        app.config.update(
+            SESSION_COOKIE_SAMESITE="None",
+            SESSION_COOKIE_SECURE=True,   # exige HTTPS
+        )
+    else:
+        app.config.update(
+            SESSION_COOKIE_SAMESITE="Lax",
+            SESSION_COOKIE_SECURE=False,
+        )
+
     # Extensões
     db.init_app(app)
     login_manager.init_app(app)
 
-    # CORS (habilita cookies para o front em 5173)
+    # CORS (habilita cookies; origens configuráveis via env)
+    # Ex.: CORS_ORIGINS=http://127.0.0.1:5173,http://localhost:5173
+    cors_origins = os.getenv(
+        "CORS_ORIGINS",
+        "http://127.0.0.1:5173,http://localhost:5173",
+    ).split(",")
     CORS(
         app,
         supports_credentials=True,
-        resources={
-            r"/api/*": {
-                "origins": [
-                    "http://127.0.0.1:5173",
-                    "http://localhost:5173",
-                ]
-            }
-        },
+        resources={r"/api/*": {"origins": cors_origins}},
     )
 
     # Flask-Login
