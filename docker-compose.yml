@@ -1,0 +1,49 @@
+version: "3.9"
+name: vestibulando
+
+services:
+  api:
+    build:
+      context: .
+      target: app
+    profiles: ["dev"]
+    command: >
+      sh -c "export FLASK_APP=wsgi.py &&
+             export FLASK_DEBUG=1 &&
+             python -m flask --app wsgi.py run --host 0.0.0.0 --port 5000"
+    environment:
+      - DATABASE_URL=sqlite:////data/vestibulando.db
+      - SECRET_KEY=troque-esta-chave
+    volumes:
+      - .:/app:cached           # hot-reload do código
+      - db_data:/data           # banco SQLite persiste aqui
+      - ./data:/seed            # CSVs da máquina host
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:5000/"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  api-prod:
+    build:
+      context: .
+      target: app
+    profiles: ["prod"]
+    environment:
+      - DATABASE_URL=sqlite:////data/vestibulando.db
+      - SECRET_KEY=${SECRET_KEY:-troque-esta-chave}
+    volumes:
+      - db_data:/data
+      - ./data:/seed
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  db_data:

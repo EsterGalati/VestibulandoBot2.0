@@ -1,0 +1,200 @@
+MANUAL – Como executar o backend com Docker
+
+Este guia explica como rodar e manter o backend Vestibulando API usando Docker.
+Com Docker, ninguém precisa configurar Python/pip localmente – só o Docker Desktop.
+
+1) Pré-requisitos
+
+Docker Desktop instalado e em execução.
+
+Terminal (Windows PowerShell, macOS Terminal ou Linux shell).
+
+Acesso ao repositório Git do projeto.
+
+Verifique:
+
+docker --version
+docker compose version
+
+
+Se docker compose não existir, use docker-compose (com hífen) nos comandos.
+
+2) Clonar o repositório
+git clone <URL_DO_SEU_REPO>.git
+cd <PASTA_DO_REPO>
+
+
+Arquivos esperados na raiz:
+
+Dockerfile
+
+docker-compose.yml
+
+requirements.txt
+
+wsgi.py
+
+pasta app/ (código)
+
+pasta data/ (opcional; CSVs de seed)
+
+3) Subir em desenvolvimento (hot-reload)
+
+Este modo usa o servidor do Flask com recarregamento automático e monta o código como volume.
+
+docker compose --profile dev up --build
+
+
+API disponível em: http://127.0.0.1:5000/
+
+Deixe essa janela rodando. Em outro terminal, execute os comandos de banco (abaixo).
+
+3.1 Criar tabelas
+docker compose --profile dev run --rm api \
+  python -m flask --app wsgi.py db-init
+
+3.2 Importar questões (seed)
+
+Coloque seu CSV em ./data/enem_questoes.csv na máquina host.
+
+docker compose --profile dev run --rm api \
+  python -m flask --app wsgi.py import-questoes --csv /seed/enem_questoes.csv
+
+
+O compose já mapeia ./data (host) para /seed (container).
+
+3.3 Teste rápido (Postman/cURL)
+
+Register: POST http://127.0.0.1:5000/api/v1/auth/register
+Body (JSON): { "email": "a@b.com", "senha": "123456" }
+
+Próxima questão: GET http://127.0.0.1:5000/api/v1/desafio/proxima
+
+Responder: POST http://127.0.0.1:5000/api/v1/desafio/responder
+Body: { "questao_id": 1, "resposta": "D" }
+
+Desempenho: GET http://127.0.0.1:5000/api/v1/desempenho/resumo
+
+O Postman guarda o cookie de sessão automaticamente após o register/login.
+
+3.4 Logs / shell dentro do container
+docker compose --profile dev logs -f api
+docker compose --profile dev exec api bash
+
+4) Parar/Limpar
+
+Parar serviços dev:
+
+docker compose --profile dev down
+
+
+Apagar também o volume do banco (reset total):
+
+docker compose --profile dev down -v
+# ou: docker volume rm vestibulando_db_data
+
+5) Subir em produção (local) – gunicorn
+
+Este modo usa gunicorn (mais próximo do que vai a produção).
+
+docker compose --profile prod up --build -d
+# API: http://127.0.0.1:8000/
+docker compose --profile prod logs -f
+docker compose --profile prod down
+
+
+Para criar tabelas/importar no perfil prod:
+
+docker compose --profile prod run --rm api-prod \
+  python -m flask --app wsgi.py db-init
+
+docker compose --profile prod run --rm api-prod \
+  python -m flask --app wsgi.py import-questoes --csv /seed/enem_questoes.csv
+
+6) Fluxo de desenvolvimento (dia a dia)
+
+docker compose --profile dev up --build
+
+Edite o código em app/...; o hot-reload aplica as mudanças.
+
+Teste com Postman/cURL.
+
+Veja logs ou entre no container se necessário.
+
+7) Adicionar/atualizar dependências
+
+Edite requirements.txt (adicione/remova libs).
+
+Rebuild para aplicar:
+
+docker compose --profile dev build --no-cache api
+docker compose --profile dev up
+
+
+Evite pip install dentro do container em dev; prefira rebuild para não perder alterações.
+
+8) Migrações de banco (opcional, recomendado)
+
+Para evoluir modelos com segurança, usar Flask-Migrate (Alembic).
+
+Adicione no requirements.txt: Flask-Migrate>=4,<5
+
+No app/__init__.py, registre Migrate(app, db).
+
+Comandos (no container dev):
+
+docker compose --profile dev run --rm api python -m flask --app wsgi.py db init      # primeira vez
+docker compose --profile dev run --rm api python -m flask --app wsgi.py db migrate -m "sua mudança"
+docker compose --profile dev run --rm api python -m flask --app wsgi.py db upgrade
+
+9) CORS / front-end
+
+O backend já habilita CORS para:
+
+http://127.0.0.1:5173
+
+http://localhost:5173
+
+No front, sempre use:
+
+fetch(url, { credentials: "include" })
+
+
+Se front e back forem domínios diferentes em produção (HTTPS), configure:
+
+SESSION_COOKIE_SAMESITE=None
+SESSION_COOKIE_SECURE=True
+
+10) Problemas comuns (FAQ)
+
+“Connection refused”
+O serviço não está rodando ou a porta está errada.
+Veja docker compose ps e docker compose --profile dev logs -f.
+
+CSV não encontrado
+Use o caminho dentro do container: /seed/enem_questoes.csv.
+Garanta que o arquivo exista em ./data/enem_questoes.csv na máquina host.
+
+401 nas rotas
+Faça register ou login no Postman primeiro (cookies de sessão).
+
+Atualizei requirements e não refletiu
+Rebuild da imagem (seção 7).
+
+Reset completo do banco
+docker compose --profile dev down -v + db-init + import-questoes.
+
+Porta em uso
+Edite docker-compose.yml e mude ports: (ex.: "5001:5000").
+
+11) Estrutura relevante
+
+Código: app/ (MVC: models, services, controllers, routes)
+
+Entrypoint: wsgi.py (expõe app = create_app())
+
+CLI: comandos db-init e import-questoes (registrados na app)
+
+Banco: SQLite em /data/vestibulando.db (volume db_data)
+
+Seeds: CSVs em ./data (no container: /seed)

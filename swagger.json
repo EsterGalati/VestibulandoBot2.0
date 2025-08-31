@@ -1,0 +1,329 @@
+openapi: 3.0.3
+info:
+  title: Vestibulando API
+  version: "1.0.0"
+  description: |
+    API em MVC para autenticação, desafios ENEM e desempenho.
+    Autenticação via **cookie de sessão** (Flask-Login).
+servers:
+  - url: http://127.0.0.1:5000
+    description: Dev (127.0.0.1)
+  - url: http://localhost:5000
+    description: Dev (localhost)
+
+tags:
+  - name: Auth
+    description: Registro, login e sessão
+  - name: Desafio
+    description: Fluxo de questões (próxima/responder)
+  - name: Desempenho
+    description: Métricas e agregações
+
+paths:
+  /api/v1/auth/register:
+    post:
+      tags: [Auth]
+      summary: Registrar usuário e iniciar sessão
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterLoginRequest'
+            example: { email: "a@b.com", senha: "123456" }
+      responses:
+        "200":
+          description: Usuário criado e logado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        "400":
+          description: Payload inválido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example: { error: "email e senha são obrigatórios" }
+        "409":
+          description: E-mail já cadastrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example: { error: "email_ja_cadastrado" }
+
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login (cria cookie de sessão)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterLoginRequest'
+            example: { email: "a@b.com", senha: "123456" }
+      responses:
+        "200":
+          description: Login ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        "401":
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example: { error: "invalid_credentials" }
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout (encerra sessão)
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: Sucesso
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OkResponse' }
+              example: { ok: true }
+        "401":
+          description: Não autenticado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/auth/me:
+    get:
+      tags: [Auth]
+      summary: Usuário atual (sessão)
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: Usuário autenticado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        "401":
+          description: Não autenticado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example: { error: "unauthenticated" }
+
+  /api/v1/desafio/proxima:
+    get:
+      tags: [Desafio]
+      summary: Próxima questão não respondida
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: Questão disponível
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Question' }
+              example:
+                id: 1
+                ano: 2020
+                pergunta: "Quanto é 2+2?"
+                alternativas: { A: "1", B: "2", C: "3", D: "4", E: "5" }
+        "204":
+          description: Sem conteúdo (não há mais questões pendentes)
+        "401":
+          description: Não autenticado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/desafio/responder:
+    post:
+      tags: [Desafio]
+      summary: Enviar resposta para uma questão
+      security: [{ cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AnswerRequest' }
+            example: { questao_id: 1, resposta: "D" }
+      responses:
+        "200":
+          description: Resultado da resposta
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnswerResult' }
+              example: { questao_id: 1, acertou: true, correta: "D" }
+        "400":
+          description: Erro de validação (id inexistente ou alternativa inválida)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              examples:
+                questao_nao_encontrada: { value: { error: "questao_nao_encontrada" } }
+                resposta_invalida:      { value: { error: "resposta_invalida" } }
+        "401":
+          description: Não autenticado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/desempenho/resumo:
+    get:
+      tags: [Desempenho]
+      summary: Resumo geral do desempenho
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: Resumo
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PerformanceSummary' }
+              example: { total: 120, acertos: 80, percentual: 66.67 }
+        "401":
+          description: Não autenticado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/desempenho/por-ano:
+    get:
+      tags: [Desempenho]
+      summary: Desempenho agrupado por ano da prova
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: Lista por ano
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/YearBreakdown' }
+              example:
+                - { ano: 2020, total: 10, acertos: 7, percentual: 70.0 }
+                - { ano: 2021, total: 8,  acertos: 5, percentual: 62.5 }
+        "401":
+          description: Não autenticado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/desempenho/por-assunto:
+    get:
+      tags: [Desempenho]
+      summary: Desempenho agrupado por assunto (heurístico)
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: Lista por assunto
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SubjectBreakdown' }
+              example:
+                - { assunto: "Matemática", total: 40, acertos: 28, percentual: 70.0 }
+                - { assunto: "Física",     total: 20, acertos: 9,  percentual: 45.0 }
+        "401":
+          description: Não autenticado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Sessão do Flask-Login (cookie `session`)
+
+  schemas:
+    RegisterLoginRequest:
+      type: object
+      required: [email, senha]
+      properties:
+        email: { type: string, format: email, example: "a@b.com" }
+        senha: { type: string, minLength: 1, example: "123456" }
+
+    User:
+      type: object
+      required: [id, email]
+      properties:
+        id: { type: integer, example: 1 }
+        email: { type: string, format: email, example: "a@b.com" }
+
+    Alternatives:
+      type: object
+      properties:
+        A: { type: string }
+        B: { type: string }
+        C: { type: string }
+        D: { type: string }
+        E: { type: string }
+
+    Question:
+      type: object
+      required: [id, ano, pergunta, alternativas]
+      properties:
+        id: { type: integer, example: 123 }
+        ano: { type: integer, example: 2020 }
+        pergunta: { type: string, example: "Quanto é 2+2?" }
+        alternativas:
+          $ref: '#/components/schemas/Alternatives'
+
+    AnswerRequest:
+      type: object
+      required: [questao_id, resposta]
+      properties:
+        questao_id: { type: integer, example: 1 }
+        resposta:
+          type: string
+          description: Alternativa escolhida
+          enum: [A, B, C, D, E]
+          example: "D"
+
+    AnswerResult:
+      type: object
+      required: [questao_id, acertou, correta]
+      properties:
+        questao_id: { type: integer, example: 1 }
+        acertou: { type: boolean, example: true }
+        correta:
+          type: string
+          enum: [A, B, C, D, E]
+          example: "D"
+
+    PerformanceSummary:
+      type: object
+      required: [total, acertos, percentual]
+      properties:
+        total: { type: integer, example: 120 }
+        acertos: { type: integer, example: 80 }
+        percentual: { type: number, format: float, example: 66.67 }
+
+    YearBreakdown:
+      type: object
+      required: [ano, total, acertos, percentual]
+      properties:
+        ano: { type: integer, example: 2020 }
+        total: { type: integer, example: 10 }
+        acertos: { type: integer, example: 7 }
+        percentual: { type: number, format: float, example: 70.0 }
+
+    SubjectBreakdown:
+      type: object
+      required: [assunto, total, acertos, percentual]
+      properties:
+        assunto: { type: string, example: "Matemática" }
+        total: { type: integer, example: 40 }
+        acertos: { type: integer, example: 28 }
+        percentual: { type: number, format: float, example: 70.0 }
+
+    Error:
+      type: object
+      properties:
+        error: { type: string, example: "mensagem_de_erro" }
+
+    OkResponse:
+      type: object
+      properties:
+        ok: { type: boolean, example: true }
