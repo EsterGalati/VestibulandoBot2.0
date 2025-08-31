@@ -49,10 +49,10 @@ def has_password(user) -> bool:
     _, stored = get_first_attr(user, PASS_FIELDS)
     if not stored:
         return False
-    # se for nosso placeholder determinístico, trata como "sem senha"
+    # trata placeholder "__GOOGLE_PLACEHOLDER__" como "sem senha"
     try:
-        from werkzeug.security import check_password_hash
-        if check_password_hash(stored, "__GOOGLE_PLACEHOLDER__"):
+        from werkzeug.security import check_password_hash as _chk
+        if _chk(stored, "__GOOGLE_PLACEHOLDER__"):
             return False
     except Exception:
         pass
@@ -76,7 +76,9 @@ def register():
         return jsonify({"error": "E-mail já cadastrado."}), 409
 
     user = Usuario(email=email)
-    set_first_attr_if_exists(user, NAME_FIELDS, nome)
+    # agora que existe a coluna, setamos diretamente
+    if hasattr(user, "nome"):
+        user.nome = nome
 
     try:
         set_password_hash(user, senha)
@@ -175,13 +177,15 @@ def google_callback():
         current_app.logger.exception("authorize_access_token falhou")
         return jsonify({"error": "Falha ao autorizar com o Google", "detail": str(e)}), 400
 
+    # 1) tenta claims do ID Token com nonce
     claims = None
     try:
-        # se você usa nonce, recupere da session; senão, mantenha assim
-        claims = oauth.google.parse_id_token(token)
+        nonce = session.pop("google_oauth_nonce", None)
+        claims = oauth.google.parse_id_token(token, nonce=nonce)
     except Exception as e:
         current_app.logger.warning("parse_id_token falhou: %s", e)
 
+    # 2) fallback: /userinfo
     if not claims or not claims.get("email"):
         try:
             resp = oauth.google.get("userinfo")
@@ -202,10 +206,10 @@ def google_callback():
     user = Usuario.query.filter_by(email=email).first()
     if not user:
         user = Usuario(email=email)
-        set_first_attr_if_exists(user, NAME_FIELDS, name)
-        # ⚠️ senha placeholder só para satisfazer NOT NULL
+        if hasattr(user, "nome"):
+            user.nome = name  # salva nome vindo do Google
+        # senha placeholder para satisfazer NOT NULL
         try:
-            # use um placeholder determinístico para podermos detectar depois, se quiser
             set_password_hash(user, "__GOOGLE_PLACEHOLDER__")
         except RuntimeError:
             pass
@@ -213,12 +217,15 @@ def google_callback():
         db.session.add(user)
         db.session.commit()
         created_now = True
+    else:
+        # se o usuário já existe e ainda não tem nome, atualize
+        if hasattr(user, "nome") and not (user.nome or "").strip() and name:
+            user.nome = name
+            db.session.commit()
 
     login_user(user)
 
     front = os.getenv("FRONTEND_URL", "http://127.0.0.1:5173")
     if created_now:
-        # leva diretamente para criar senha no primeiro login
         return redirect(f"{front}/criar-senha?from=google")
-    # logins seguintes continuam indo para a Home (ou seu guard decide)
     return redirect(f"{front}/?login=google_ok")
