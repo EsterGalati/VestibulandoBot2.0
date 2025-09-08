@@ -2,7 +2,8 @@ version: "3.9"
 name: vestibulando
 
 services:
-  api:
+  # ---------- DEV (Flask dev server em :5000 com auto-reload) ----------
+  api-dev:
     build:
       context: .
       target: app
@@ -12,31 +13,31 @@ services:
              export FLASK_DEBUG=1 &&
              python -m flask --app wsgi.py run --host 0.0.0.0 --port 5000"
     environment:
+      - ENV=dev
+      - SECRET_KEY=${SECRET_KEY:-mude-esta-chave}
       - DATABASE_URL=sqlite:////data/vestibulando.db
-      - SECRET_KEY=troque-esta-chave
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
     volumes:
-      - .:/app:cached           # hot-reload do código
-      - db_data:/data           # banco SQLite persiste aqui
-      - ./data:/seed            # CSVs da máquina host
+      - db_data:/data
+      - ./data:/seed:ro
     ports:
       - "5000:5000"
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:5000/"]
-      interval: 10s
-      timeout: 3s
-      retries: 10
 
-  api-prod:
+  # ---------- PROD (Gunicorn em :8000) ----------
+  api:
     build:
       context: .
       target: app
-    profiles: ["prod"]
     environment:
+      - ENV=prod
+      - SECRET_KEY=${SECRET_KEY:-mude-esta-chave}
       - DATABASE_URL=sqlite:////data/vestibulando.db
-      - SECRET_KEY=${SECRET_KEY:-troque-esta-chave}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
     volumes:
       - db_data:/data
-      - ./data:/seed
+      - ./data:/seed:ro
     ports:
       - "8000:8000"
     healthcheck:
@@ -44,6 +45,23 @@ services:
       interval: 10s
       timeout: 3s
       retries: 10
+
+  # ---------- JOB de seed (cria tabelas e importa CSV) ----------
+  seed:
+    build:
+      context: .
+      target: app
+    command: >
+      sh -c "flask --app wsgi.py db-init &&
+             flask --app wsgi.py import-questoes --csv /seed/enem_questoes.csv"
+    environment:
+      - ENV=prod
+      - SECRET_KEY=${SECRET_KEY:-mude-esta-chave}
+      - DATABASE_URL=sqlite:////data/vestibulando.db
+    volumes:
+      - db_data:/data
+      - ./data:/seed:ro
+    profiles: ["seed"]
 
 volumes:
   db_data:
