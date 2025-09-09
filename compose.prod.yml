@@ -2,10 +2,9 @@ version: "3.9"
 
 services:
   api:
-    image: caio/vestibulando-api:prod
+    image: caioleonardo/vestibulando-api:prod
     restart: unless-stopped
-    env_file:
-      - .env
+    env_file: [.env]
     environment:
       - ENV=${ENV}
       - SECRET_KEY=${SECRET_KEY}
@@ -28,9 +27,8 @@ services:
     command: --interval 30 --label-enable --cleanup --rolling-restart
 
   seed:
-    image: caio/vestibulando-api:prod
-    env_file:
-      - .env
+    image: caioleonardo/vestibulando-api:prod
+    env_file: [.env]
     command: >
       sh -c "flask --app wsgi.py db-init &&
              flask --app wsgi.py import-questoes --csv /seed/enem_questoes.csv"
