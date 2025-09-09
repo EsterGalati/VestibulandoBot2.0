@@ -3,6 +3,8 @@ MANUAL – Como executar o backend com Docker
 Este guia explica como rodar e manter o backend Vestibulando API usando Docker.
 Com Docker, ninguém precisa configurar Python/pip localmente – só o Docker Desktop.
 
+
+
 1) Pré-requisitos
 
 Docker Desktop instalado e em execução.
