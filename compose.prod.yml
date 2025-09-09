@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  api:
+    image: caio/vestibulando-api:prod
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - ENV=${ENV}
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - FRONTEND_URL=${FRONTEND_URL}
+    volumes:
+      - db_data:/data
+      - ./data:/seed:ro
+    ports:
+      - "8000:8000"
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  watchtower:
+    image: containrrr/watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30 --label-enable --cleanup --rolling-restart
+
+  seed:
+    image: caio/vestibulando-api:prod
+    env_file:
+      - .env
+    command: >
+      sh -c "flask --app wsgi.py db-init &&
+             flask --app wsgi.py import-questoes --csv /seed/enem_questoes.csv"
+    volumes:
+      - db_data:/data
+      - ./data:/seed:ro
+    profiles: ["seed"]
+
+volumes:
+  db_data:
