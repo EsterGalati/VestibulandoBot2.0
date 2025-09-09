@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.extensions import db, oauth
 from app.models.usuario import Usuario
 import os, secrets
-
+ 
 bp = Blueprint("auth", __name__)
 
 # ---------- Helpers ----------
