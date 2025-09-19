@@ -8,3 +8,4 @@ pandas>=2.2,<3
 click>=8.1,<9
 Authlib>=1.6,<2
 requests>=2.31,<3
+Flask-Migrate>=4.0.5
