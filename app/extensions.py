@@ -4,7 +4,6 @@ from __future__ import annotations
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from authlib.integrations.flask_client import OAuth
-from flask_migrate import Migrate
 
 
 class Extensions:
@@ -15,19 +14,15 @@ class Extensions:
         self.db = SQLAlchemy()
         self.login_manager = LoginManager()
         self.oauth = OAuth()
-        self.migrate = Migrate()
 
         # ajustes default
-        # API não deve redirecionar para página de login HTML
-        self.login_manager.login_view = None
+        self.login_manager.login_view = None  # API não redireciona para login HTML
 
     def init_app(self, app) -> None:
         """Inicializa todas as extensões com a aplicação Flask."""
         self.db.init_app(app)
         self.login_manager.init_app(app)
         self.oauth.init_app(app)
-        # importante: migrate depende de 'app' e 'db'
-        self.migrate.init_app(app, self.db)
 
 
 # instância única usada pelo resto da app
@@ -37,7 +32,6 @@ _ext = Extensions()
 db: SQLAlchemy = _ext.db
 login_manager: LoginManager = _ext.login_manager
 oauth: OAuth = _ext.oauth
-migrate: Migrate = _ext.migrate
 
 # função auxiliar para inicialização manual (caso precise)
 def init_app(app) -> None:
