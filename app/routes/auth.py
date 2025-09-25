@@ -1,17 +1,6 @@
-# app/routes/auth.py
-from flask import Blueprint, jsonify, redirect, url_for, request, session, current_app
-from flask_login import login_required, login_user, logout_user, current_user
-from ..extensions import oauth, db
-from ..models.usuario import Usuario
+from flask import Blueprint, request
+from flask_login import login_required
 from app.controllers.auth_controller import AuthController
-from secrets import token_urlsafe
-from authlib.integrations.base_client.errors import MismatchingStateError
-import os
-
-try:
-    from werkzeug.security import generate_password_hash
-except Exception:
-    generate_password_hash = None
 
 bp = Blueprint("auth", __name__)
 

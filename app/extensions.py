@@ -20,8 +20,7 @@ class Extensions:
         self.cors = CORS()  # ← Adicionado
 
         # ajustes default
-        # API não deve redirecionar para página de login HTML
-        self.login_manager.login_view = None
+        self.login_manager.login_view = None  # API não redireciona para login HTML
 
     def init_app(self, app) -> None:
         """Inicializa todas as extensões com a aplicação Flask."""
