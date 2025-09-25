@@ -18,6 +18,10 @@ def create_app():
     # URLs
     app.config['FRONTEND_URL'] = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
     app.config['BACKEND_URL'] = os.environ.get('BACKEND_URL', 'http://localhost:8000')
+    app.config['CHAT_API_URL'] = os.environ.get('CHAT_API_URL')
+    app.config['CHAT_API_KEY'] = os.environ.get('CHAT_API_KEY')
+    app.config['CHAT_API_TIMEOUT'] = os.environ.get('CHAT_API_TIMEOUT', '15')
+    
     
     print(f"✅ Configurações carregadas")
     
@@ -75,9 +79,13 @@ def create_app():
     try:
         print("📝 Registrando blueprints...")
         from app.routes.auth import bp as auth_bp
+        from app.routes.chat import bp as chat_bp
         app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
         print("✅ Blueprint auth registrado com prefixo /api/v1/auth")
         
+        app.register_blueprint(chat_bp, url_prefix='/api/v1/chat')
+        print('Blueprint chat registrado com prefixo /api/v1/chat')
+
         # Se tiver outros blueprints, adicione aqui
         
     except Exception as e:
