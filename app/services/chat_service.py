@@ -32,7 +32,9 @@ class ChatService:
             "messages": mensagens,
             "temperature": 0.3,
             "top_p": 0.9,
-            "max_completion_tokens": 600,
+            # Groq (OpenAI compat) usa "max_tokens" no Chat Completions
+            "max_tokens": 300,
+            # Em Groq, se "n" for enviado, deve ser 1
             "n": 1,
         }
         return url, api_key, timeout, body
@@ -40,18 +42,25 @@ class ChatService:
     @staticmethod
     def _carregar_config() -> Tuple[str, Optional[str], float, str]:
         cfg = current_app.config
-        url = (cfg.get("CHAT_API_URL") or "").strip()
+        import os
+
+        # URL do endpoint (ex.: https://api.groq.com/openai/v1/chat/completions)
+        url = (cfg.get("CHAT_API_URL") or os.environ.get("CHAT_API_URL") or "").strip()
         if not url:
             raise RuntimeError("CHAT_API_URL nao configurada. Ajuste o .env.")
 
-        api_key = (cfg.get("CHAT_API_KEY") or "").strip() or None
-        timeout_value = cfg.get("CHAT_API_TIMEOUT", 15)
+        # API Key (ex.: gsk_...)
+        api_key = (cfg.get("CHAT_API_KEY") or os.environ.get("CHAT_API_KEY") or "").strip() or None
+
+        # Timeout (segundos)
+        timeout_value = cfg.get("CHAT_API_TIMEOUT") or os.environ.get("CHAT_API_TIMEOUT") or 15
         try:
             timeout = float(timeout_value)
         except (TypeError, ValueError):
             timeout = 15.0
 
-        model = (cfg.get("CHAT_API_MODEL") or "").strip()
+        # Modelo (ex.: llama-3.1-8b-instant)
+        model = (cfg.get("CHAT_API_MODEL") or os.environ.get("CHAT_API_MODEL") or "").strip()
         if not model:
             raise RuntimeError("CHAT_API_MODEL nao configurado. Ajuste o .env.")
 
@@ -60,9 +69,11 @@ class ChatService:
     @staticmethod
     def _instrucoes_sistema() -> str:
         return (
-            "Voce e uma assistente de estudos para o ENEM. Responda em ate tres paragrafos curtos, "
+            "Voce e uma assistente de estudos para o ENEM. Responda em ate um paragrafo curto, "
             "em portugues do Brasil, sendo objetiva e conectando a resposta ao contexto do exame. "
             "Se fizer sentido, cite competencias ou provas especificas do ENEM."
+            "Se a pergunta nao fizer sentido, responda que nao pode ajudar."
+            "Caso a pergunta tenha ambiguidade,peça mais detalhes."
         )
 
     def _consultar_provedor(
