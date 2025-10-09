@@ -1,137 +1,76 @@
-# app/models/resultado.py
 from __future__ import annotations
-
-from typing import Dict, Optional, List, Tuple
-from sqlalchemy import Index, UniqueConstraint
+from datetime import datetime
+from typing import Dict
 from app.extensions import db
 
 
-class ResultadoUsuario(db.Model):
-    """Respostas dos usuários por questão."""
+class ResultadoSimulado(db.Model):
+    """Resultado consolidado de um usuário em um simulado."""
 
-    __tablename__ = "resultado_usuario"
+    __tablename__ = "TB_RESULTADO_SIMULADO"
 
-    # -------------
-    # Colunas
-    # -------------
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    cod_resultado = db.Column("COD_RESULTADO", db.Integer, primary_key=True, autoincrement=True)
+    cod_usuario = db.Column("COD_USUARIO", db.Integer, db.ForeignKey("TB_USUARIO.COD_USUARIO"), nullable=False)
+    cod_simulado = db.Column("COD_SIMULADO", db.Integer, db.ForeignKey("TB_SIMULADO.COD_SIMULADO"), nullable=False)
 
-    usuario_id = db.Column(
-        db.Integer, db.ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False, index=True
-    )
-    questao_id = db.Column(
-        db.Integer, db.ForeignKey("questoes_enem.id", ondelete="CASCADE"), nullable=False, index=True
-    )
+    qtd_acertos = db.Column("QTD_ACERTOS", db.Integer, nullable=False, default=0)
+    qtd_erros = db.Column("QTD_ERROS", db.Integer, nullable=False, default=0)
+    nota_final = db.Column("NOTA_FINAL", db.Float, nullable=True)
+    dt_finalizacao = db.Column("DT_FINALIZACAO", db.DateTime, default=datetime.utcnow)
 
-    resposta = db.Column(db.String(1), nullable=False)  # 'A'..'E'
-    acertou = db.Column(db.Boolean, nullable=False)
+    usuario = db.relationship("Usuario", backref="resultados_simulados", lazy=True)
+    simulado = db.relationship("Simulado", backref="resultados", lazy=True)
 
-    respondido_em = db.Column(
-        db.DateTime(timezone=True),
-        server_default=db.func.now(),
-        nullable=False,
-        index=True,
-    )
+    def calcular_nota(self, total_questoes: int) -> None:
+        """Calcula a nota final proporcional aos acertos."""
+        if total_questoes > 0:
+            self.nota_final = round((self.qtd_acertos / total_questoes) * 100, 2)
+        else:
+            self.nota_final = 0.0
 
-    # -------------
-    # Relacionamentos
-    # -------------
-    usuario = db.relationship("Usuario", backref="resultados")
-    questao = db.relationship("QuestaoENEM", backref="respostas")
-
-    # -------------
-    # Índices / Constraints
-    # -------------
-    __table_args__ = (
-        # Evita múltiplos registros do mesmo usuário para a mesma questão
-        UniqueConstraint("usuario_id", "questao_id", name="uq_usuario_questao"),
-        # Índices auxiliares para filtros comuns
-        Index("ix_resultado_usuario_usuario_id_data", "usuario_id", "respondido_em"),
-        Index("ix_resultado_usuario_questao_id_data", "questao_id", "respondido_em"),
-    )
-
-    # -------------
-    # Utilidades
-    # -------------
     def to_dict(self) -> Dict:
-        """Serialização amigável para APIs."""
+        """Serializa o resultado do simulado."""
         return {
-            "id": self.id,
-            "usuario_id": self.usuario_id,
-            "questao_id": self.questao_id,
-            "resposta": self.resposta,
-            "acertou": self.acertou,
-            "respondido_em": self.respondido_em.isoformat() if self.respondido_em else None,
+            "cod_resultado": self.cod_resultado,
+            "cod_usuario": self.cod_usuario,
+            "cod_simulado": self.cod_simulado,
+            "qtd_acertos": self.qtd_acertos,
+            "qtd_erros": self.qtd_erros,
+            "nota_final": self.nota_final,
+            "dt_finalizacao": self.dt_finalizacao.isoformat() if self.dt_finalizacao else None,
         }
 
     @classmethod
-    def registrar_resposta(
-        cls, *, usuario_id: int, questao_id: int, resposta: str, correta: str
-    ) -> "ResultadoUsuario":
-        """
-        Cria ou atualiza a resposta do usuário para a questão,
-        garantindo unicidade (usuario_id, questao_id).
-        """
-        resposta = (resposta or "").strip().upper()
-        correta = (correta or "").strip().upper()
-        acertou = resposta == correta
+    def get_by_usuario_e_simulado(cls, cod_usuario: int, cod_simulado: int) -> "ResultadoSimulado | None":
+        """Busca o resultado de um usuário em um simulado específico."""
+        return cls.query.filter_by(cod_usuario=cod_usuario, cod_simulado=cod_simulado).first()
 
-        inst: Optional["ResultadoUsuario"] = cls.query.filter_by(
-            usuario_id=usuario_id, questao_id=questao_id
-        ).first()
-
-        if inst:
-            inst.resposta = resposta
-            inst.acertou = acertou
+    @classmethod
+    def registrar_resultado(
+        cls,
+        cod_usuario: int,
+        cod_simulado: int,
+        qtd_acertos: int,
+        qtd_erros: int,
+        total_questoes: int,
+    ) -> "ResultadoSimulado":
+        """Cria ou atualiza o resultado de um simulado."""
+        resultado = cls.get_by_usuario_e_simulado(cod_usuario, cod_simulado)
+        if resultado:
+            resultado.qtd_acertos = qtd_acertos
+            resultado.qtd_erros = qtd_erros
         else:
-            inst = cls(
-                usuario_id=usuario_id,
-                questao_id=questao_id,
-                resposta=resposta,
-                acertou=acertou,
+            resultado = cls(
+                cod_usuario=cod_usuario,
+                cod_simulado=cod_simulado,
+                qtd_acertos=qtd_acertos,
+                qtd_erros=qtd_erros,
             )
-            db.session.add(inst)
+            db.session.add(resultado)
 
+        resultado.calcular_nota(total_questoes)
         db.session.commit()
-        return inst
-
-    @classmethod
-    def stats_usuario(cls, usuario_id: int) -> Dict[str, int | float]:
-        """
-        Retorna estatísticas básicas do usuário:
-        total respondidas, acertos, erros e acurácia (%).
-        """
-        total = cls.query.filter_by(usuario_id=usuario_id).count()
-        acertos = cls.query.filter_by(usuario_id=usuario_id, acertou=True).count()
-        erros = total - acertos
-        acc = (acertos / total * 100.0) if total else 0.0
-        return {"total": total, "acertos": acertos, "erros": erros, "acuracia_pct": round(acc, 2)}
-
-    @classmethod
-    def acuracia_por_ano(cls, usuario_id: int) -> List[Dict[str, int | float]]:
-        """
-        Acurácia agrupada pelo ano da questão.
-        """
-        # join com questoes_enem para obter o ano
-        from app.models import QuestaoENEM  # import local para evitar ciclo
-        q = (
-            db.session.query(QuestaoENEM.ano, db.func.count(cls.id), db.func.sum(db.case((cls.acertou, 1), else_=0)))
-            .join(QuestaoENEM, QuestaoENEM.id == cls.questao_id)
-            .filter(cls.usuario_id == usuario_id)
-            .group_by(QuestaoENEM.ano)
-            .order_by(QuestaoENEM.ano.asc())
-        )
-
-        resultado: List[Dict[str, int | float]] = []
-        for ano, total, acertos in q:
-            acc = (acertos / total * 100.0) if total else 0.0
-            resultado.append(
-                {"ano": int(ano), "total": int(total), "acertos": int(acertos or 0), "acuracia_pct": round(acc, 2)}
-            )
         return resultado
 
-    def __repr__(self) -> str:
-        return (
-            f"<ResultadoUsuario id={self.id} usuario={self.usuario_id} "
-            f"questao={self.questao_id} resp={self.resposta} ok={self.acertou}>"
-        )
+    def __repr__(self):
+        return f"<ResultadoSimulado cod={self.cod_resultado} usuario={self.cod_usuario} simulado={self.cod_simulado} nota={self.nota_final}>"

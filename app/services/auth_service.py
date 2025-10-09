@@ -23,7 +23,7 @@ class AuthService:
 
         user = Usuario(
             email=email.strip().lower(),
-            password_hash=generate_password_hash(senha),
+            senha_hash=generate_password_hash(senha),
         )
         db.session.add(user)
         try:
@@ -42,7 +42,7 @@ class AuthService:
             return None
 
         user = Usuario.query.filter_by(email=email.strip().lower()).first()
-        if user and check_password_hash(user.password_hash, senha):
+        if user and check_password_hash(user.senha_hash, senha):
             return user
         return None
 

@@ -1,27 +1,28 @@
-MANUAL – Como executar o backend com Docker
 
-Este guia explica como rodar e manter o backend Vestibulando API usando Docker.
-Com Docker, ninguém precisa configurar Python/pip localmente – só o Docker Desktop.
+Você disse:
+🧠 VestibulandoBot 2.0 – Backend API
 
+Backend completo em Flask + SQLAlchemy, containerizado com Docker,
+e preparado para integração com o front-end Vue/Angular.
+Inclui módulos de Matérias, Questões, Simulados e Resultados.
 
+🐳 1) Pré-requisitos
 
-1) Pré-requisitos
+Docker Desktop instalado e em execução
 
-Docker Desktop instalado e em execução.
+Terminal (PowerShell / macOS Terminal / Shell Linux)
 
-Terminal (Windows PowerShell, macOS Terminal ou Linux shell).
+Acesso ao repositório Git do projeto
 
-Acesso ao repositório Git do projeto.
-
-Verifique:
+Verifique se o Docker está funcionando:
 
 docker --version
 docker compose version
 
 
-Se docker compose não existir, use docker-compose (com hífen) nos comandos.
+⚠️ Se docker compose não existir, use docker-compose (com hífen).
 
-2) Clonar o repositório
+📂 2) Clonar o repositório
 git clone <URL_DO_SEU_REPO>.git
 cd <PASTA_DO_REPO>
 
@@ -29,174 +30,243 @@ cd <PASTA_DO_REPO>
 Arquivos esperados na raiz:
 
 Dockerfile
-
 docker-compose.yml
-
 requirements.txt
-
 wsgi.py
+app/         # código-fonte
+data/        # CSVs para importação
 
-pasta app/ (código)
+⚙️ 3) Subir em desenvolvimento (hot-reload)
 
-pasta data/ (opcional; CSVs de seed)
-
-3) Subir em desenvolvimento (hot-reload)
-
-Este modo usa o servidor do Flask com recarregamento automático e monta o código como volume.
+O modo dev usa o servidor Flask com recarregamento automático.
 
 docker compose --profile dev up --build
 
 
-API disponível em: http://127.0.0.1:5000/
+📡 API disponível em:
+👉 http://127.0.0.1:8000/
 
-Deixe essa janela rodando. Em outro terminal, execute os comandos de banco (abaixo).
+Deixe essa janela rodando.
+Em outro terminal, execute os comandos de banco de dados 👇
 
-3.1 Criar tabelas
+🏗️ 3.1 Criar tabelas
 docker compose --profile dev run --rm api \
   python -m flask --app wsgi.py db-init
 
-3.2 Importar questões (seed)
+📥 3.2 Importar dados iniciais (matérias, simulados e questões)
 
-Coloque seu CSV em ./data/enem_questoes.csv na máquina host.
+Garanta que os arquivos CSV existam em ./data/:
+
+data/materias.csv
+data/simulados.csv
+data/enem_questoes.csv
+
+
+Depois execute:
 
 docker compose --profile dev run --rm api \
-  python -m flask --app wsgi.py import-questoes --csv /seed/enem_questoes.csv
+  python -m flask --app wsgi.py import-dados
 
 
-O compose já mapeia ./data (host) para /seed (container).
+O Docker já mapeia ./data (host) → /seed (container).
 
-3.3 Teste rápido (Postman/cURL)
+🧪 3.3 Teste rápido (Postman / cURL)
+➤ Listar matérias
+GET http://127.0.0.1:8000/api/v1/materias/
 
-Register: POST http://127.0.0.1:5000/api/v1/auth/register
-Body (JSON): { "email": "a@b.com", "senha": "123456" }
+➤ Criar questão
+POST http://127.0.0.1:8000/api/v1/questoes/
+Content-Type: application/json
 
-Próxima questão: GET http://127.0.0.1:5000/api/v1/desafio/proxima
 
-Responder: POST http://127.0.0.1:5000/api/v1/desafio/responder
-Body: { "questao_id": 1, "resposta": "D" }
+Body:
 
-Desempenho: GET http://127.0.0.1:5000/api/v1/desempenho/resumo
+{
+  "tx_questao": "Capital do Brasil?",
+  "ano_questao": 2025,
+  "cod_materia": 4,
+  "tx_resposta_correta": "D",
+  "alternativas": [
+    {"tx_letra": "A", "tx_texto": "São Paulo"},
+    {"tx_letra": "B", "tx_texto": "Rio de Janeiro"},
+    {"tx_letra": "C", "tx_texto": "Curitiba"},
+    {"tx_letra": "D", "tx_texto": "Brasília"},
+    {"tx_letra": "E", "tx_texto": "Salvador"}
+  ]
+}
 
-O Postman guarda o cookie de sessão automaticamente após o register/login.
+➤ Criar simulado
+POST http://127.0.0.1:8000/api/v1/simulados/
 
-3.4 Logs / shell dentro do container
+{
+  "titulo": "Simulado ENEM 2025 - Matemática",
+  "descricao": "Questões focadas em Matemática e Lógica",
+  "ativo": true
+}
+
+➤ Adicionar questão a um simulado
+POST http://127.0.0.1:8000/api/v1/simulados/1/questoes
+
+{
+  "cod_questao": 1,
+  "ordem": 1
+}
+
+➤ Registrar resultado do aluno
+POST http://127.0.0.1:8000/api/v1/simulados/1/resultados
+
+{
+  "cod_usuario": 1,
+  "qtd_acertos": 8,
+  "qtd_erros": 2
+}
+
+🧩 3.4 Logs / shell dentro do container
 docker compose --profile dev logs -f api
 docker compose --profile dev exec api bash
 
-4) Parar/Limpar
+🧹 4) Parar / Limpar
 
 Parar serviços dev:
 
 docker compose --profile dev down
 
 
-Apagar também o volume do banco (reset total):
+Apagar volume do banco (reset total):
 
 docker compose --profile dev down -v
-# ou: docker volume rm vestibulando_db_data
+# ou
+docker volume rm vestibulando_db_data
 
-5) Subir em produção (local) – gunicorn
+🚀 5) Subir em produção (local) – Gunicorn
 
-Este modo usa gunicorn (mais próximo do que vai a produção).
+O modo prod usa Gunicorn, semelhante ao ambiente de deploy real.
 
 docker compose --profile prod up --build -d
 # API: http://127.0.0.1:8000/
+
+
+Ver logs:
+
 docker compose --profile prod logs -f
+
+
+Parar:
+
 docker compose --profile prod down
 
 
-Para criar tabelas/importar no perfil prod:
+Criar tabelas e importar dados no modo prod:
 
 docker compose --profile prod run --rm api-prod \
   python -m flask --app wsgi.py db-init
 
 docker compose --profile prod run --rm api-prod \
-  python -m flask --app wsgi.py import-questoes --csv /seed/enem_questoes.csv
+  python -m flask --app wsgi.py import-dados
 
-6) Fluxo de desenvolvimento (dia a dia)
-
+💻 6) Fluxo de desenvolvimento (dia a dia)
 docker compose --profile dev up --build
 
-Edite o código em app/...; o hot-reload aplica as mudanças.
 
-Teste com Postman/cURL.
+Edite o código dentro de app/; o hot-reload aplica automaticamente.
+Teste no Postman / Insomnia / cURL.
+Use docker compose logs para acompanhar o backend em tempo real.
 
-Veja logs ou entre no container se necessário.
+🧩 7) Adicionar / atualizar dependências
 
-7) Adicionar/atualizar dependências
-
-Edite requirements.txt (adicione/remova libs).
-
-Rebuild para aplicar:
+Edite requirements.txt e reconstrua:
 
 docker compose --profile dev build --no-cache api
 docker compose --profile dev up
 
 
-Evite pip install dentro do container em dev; prefira rebuild para não perder alterações.
+💡 Evite pip install direto no container — use rebuild para manter consistência.
 
-8) Migrações de banco (opcional, recomendado)
+🗃️ 8) Migrações de banco (opcional, recomendado)
 
-Para evoluir modelos com segurança, usar Flask-Migrate (Alembic).
+Para evoluir os modelos sem perder dados, use Flask-Migrate (Alembic).
 
-Adicione no requirements.txt: Flask-Migrate>=4,<5
+Adicione no requirements.txt:
 
-No app/__init__.py, registre Migrate(app, db).
+Flask-Migrate>=4,<5
 
-Comandos (no container dev):
 
-docker compose --profile dev run --rm api python -m flask --app wsgi.py db init      # primeira vez
-docker compose --profile dev run --rm api python -m flask --app wsgi.py db migrate -m "sua mudança"
+No app/__init__.py:
+
+from flask_migrate import Migrate
+Migrate(app, db)
+
+
+Comandos:
+
+docker compose --profile dev run --rm api python -m flask --app wsgi.py db init
+docker compose --profile dev run --rm api python -m flask --app wsgi.py db migrate -m "sua alteração"
 docker compose --profile dev run --rm api python -m flask --app wsgi.py db upgrade
 
-9) CORS / front-end
+🌐 9) CORS / Front-end
 
-O backend já habilita CORS para:
+O backend já libera CORS para:
 
 http://127.0.0.1:5173
-
 http://localhost:5173
+
 
 No front, sempre use:
 
 fetch(url, { credentials: "include" })
 
 
-Se front e back forem domínios diferentes em produção (HTTPS), configure:
+Em produção (HTTPS e domínios diferentes):
 
 SESSION_COOKIE_SAMESITE=None
 SESSION_COOKIE_SECURE=True
 
-10) Problemas comuns (FAQ)
+🧭 10) Problemas comuns (FAQ)
 
-“Connection refused”
-O serviço não está rodando ou a porta está errada.
-Veja docker compose ps e docker compose --profile dev logs -f.
+❌ “Connection refused”
+→ Serviço não está rodando ou porta incorreta.
+Use:
 
-CSV não encontrado
-Use o caminho dentro do container: /seed/enem_questoes.csv.
-Garanta que o arquivo exista em ./data/enem_questoes.csv na máquina host.
+docker compose ps
+docker compose --profile dev logs -f
 
-401 nas rotas
-Faça register ou login no Postman primeiro (cookies de sessão).
 
-Atualizei requirements e não refletiu
-Rebuild da imagem (seção 7).
+❌ “CSV não encontrado”
+→ Garanta que os arquivos existam em ./data (no host).
+Dentro do container, o caminho é /seed.
 
-Reset completo do banco
-docker compose --profile dev down -v + db-init + import-questoes.
+❌ “Atualizei requirements e não refletiu”
+→ Rebuild da imagem (ver seção 7).
 
-Porta em uso
-Edite docker-compose.yml e mude ports: (ex.: "5001:5000").
+❌ “Reset completo do banco”
 
-11) Estrutura relevante
+docker compose --profile dev down -v
+docker compose --profile dev run --rm api python -m flask --app wsgi.py db-init
+docker compose --profile dev run --rm api python -m flask --app wsgi.py import-dados
 
-Código: app/ (MVC: models, services, controllers, routes)
 
-Entrypoint: wsgi.py (expõe app = create_app())
+❌ “Porta em uso”
+→ Edite docker-compose.yml e altere:
 
-CLI: comandos db-init e import-questoes (registrados na app)
+ports:
+  - "8001:8000"
 
-Banco: SQLite em /data/vestibulando.db (volume db_data)
+🧱 11) Estrutura relevante do projeto
+app/
+ ├── models/         # Modelos ORM (SQLAlchemy)
+ ├── controllers/    # Camada de controle (HTTP)
+ ├── services/       # Lógica de negócio
+ ├── routes/         # Blueprints / endpoints REST
+ ├── extensions/     # Configurações (db, login, oauth)
+ └── __init__.py     # create_app()
 
-Seeds: CSVs em ./data (no container: /seed)
+wsgi.py              # Entry point principal
+data/                # CSVs (materias, simulados, questoes)
+
+
+📍 Banco: SQLite → /data/vestibulando.db
+📍 Seeds: ./data (mapeado como /seed dentro do container)
+
+✨ Pronto!
+Seu backend Flask está totalmente containerizado, com hot-reload, importação automática de dados e estrutura modular.
+Agora é só integrar o front-end e começar os testes dos endpoints.
