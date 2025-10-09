@@ -1,3 +1,21 @@
-﻿ano,pergunta,opcao_a,opcao_b,opcao_c,opcao_d,opcao_e,resposta_correta
-2020,"Quanto é 2+2?",1,2,3,4,5,D
-2021,"Capital do Brasil?",Sao Paulo,Rio de Janeiro,Belo Horizonte,Brasilia,Curitiba,D
+﻿ano,cod_materia,pergunta,opcao_a,opcao_b,opcao_c,opcao_d,opcao_e,resposta_correta
+2020,1,"Quanto é 2 + 2?",1,2,3,4,5,D
+2021,4,"Capital do Brasil?",Sao Paulo,Rio de Janeiro,Belo Horizonte,Brasilia,Curitiba,D
+2020,1,"Resultado de 5 x 3?",10,12,15,20,25,C
+2021,3,"Maior planeta do Sistema Solar?",Terra,Marte,Júpiter,Saturno,Vênus,C
+2020,2,"Quem pintou a Mona Lisa?",Van Gogh,Da Vinci,Picasso,Rembrandt,Michelangelo,B
+2021,3,"Elemento químico da água?",H2O,CO2,NaCl,CH4,O2,A
+2020,4,"Capital da França?",Berlim,Paris,Londres,Madrid,Roma,B
+2021,4,"Continente onde fica o Egito?",África,Ásia,Europa,América,Oceania,A
+2020,1,"Resultado de 10 / 2?",3,4,5,6,7,C
+2021,2,"Autor de Dom Casmurro?",Machado de Assis,José de Alencar,Clarice Lispector,Camões,Carlos Drummond,A
+2020,1,"Qual o valor aproximado de π (pi)?",2.14,3.14,3.41,4.13,3.00,B
+2021,4,"País conhecido como Terra do Sol Nascente?",China,Coreia do Sul,Vietnã,Japão,Tailândia,D
+2020,4,"Quem descobriu o Brasil?",Dom Pedro I,Pedro Álvares Cabral,Cristóvão Colombo,Vasco da Gama,Tiradentes,B
+2021,4,"Maior oceano do planeta?",Atlântico,Índico,Pacífico,Ártico,Antártico,C
+2020,3,"Planeta mais próximo do Sol?",Vênus,Terra,Marte,Mercúrio,Júpiter,D
+2021,3,"Animal símbolo da Austrália?",Canguru,Koala,Diabo da Tasmânia,Emu,Ornitorrinco,A
+2020,3,"Símbolo químico do Ouro?",Ag,Fe,Au,Cu,Al,C
+2021,1,"Resultado de 9 - 4?",3,4,5,6,7,C
+2020,3,"Principal gás da atmosfera?",Oxigênio,Hidrogênio,Nitrogênio,Carbono,Argônio,C
+2021,4,"Maior deserto do mundo?",Saara,Gobi,Antártico,Kalahari,Atacama,C
