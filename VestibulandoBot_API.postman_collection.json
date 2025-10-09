@@ -1,0 +1,211 @@
+{
+  "info": {
+    "_postman_id": "9f11b1e3-5f5a-4b78-9d0f-vestibulando",
+    "name": "VestibulandoBot API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "calza-gpt"
+  },
+  "item": [
+    {
+      "name": "📘 Materias",
+      "item": [
+        {
+          "name": "Listar todas as matérias",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/api/v1/materias/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "v1", "materias", ""]
+            }
+          }
+        },
+        {
+          "name": "Criar nova matéria",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome_materia\": \"Matemática\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/v1/materias/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "v1", "materias", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧩 Questoes",
+      "item": [
+        {
+          "name": "Listar todas as questões",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8000/api/v1/questoes/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "v1", "questoes", ""]
+            }
+          }
+        },
+        {
+          "name": "Buscar questão por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8000/api/v1/questoes/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "v1", "questoes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Criar nova questão com alternativas",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tx_questao\": \"Qual é a capital da França?\",\n  \"ano_questao\": 2024,\n  \"cod_materia\": 4,\n  \"tx_resposta_correta\": \"B\",\n  \"alternativas\": [\n    {\"tx_letra\": \"A\", \"tx_texto\": \"Londres\"},\n    {\"tx_letra\": \"B\", \"tx_texto\": \"Paris\"},\n    {\"tx_letra\": \"C\", \"tx_texto\": \"Roma\"},\n    {\"tx_letra\": \"D\", \"tx_texto\": \"Madri\"},\n    {\"tx_letra\": \"E\", \"tx_texto\": \"Berlim\"}\n  ]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/v1/questoes/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "v1", "questoes", ""]
+            }
+          }
+        },
+        {
+          "name": "Atualizar questão existente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tx_questao\": \"Quanto é 5 x 3?\",\n  \"ano_questao\": 2023,\n  \"cod_materia\": 1,\n  \"tx_resposta_correta\": \"C\",\n  \"alternativas\": [\n    {\"tx_letra\": \"A\", \"tx_texto\": \"10\"},\n    {\"tx_letra\": \"B\", \"tx_texto\": \"12\"},\n    {\"tx_letra\": \"C\", \"tx_texto\": \"15\"},\n    {\"tx_letra\": \"D\", \"tx_texto\": \"18\"},\n    {\"tx_letra\": \"E\", \"tx_texto\": \"20\"}\n  ]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/v1/questoes/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "v1", "questoes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Deletar questão",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://localhost:8000/api/v1/questoes/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "v1", "questoes", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧠 Simulados",
+      "item": [
+        {
+          "name": "Listar simulados",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8000/api/v1/simulados/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "v1", "simulados", ""]
+            }
+          }
+        },
+        {
+          "name": "Criar novo simulado",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Simulado ENEM 2025\",\n  \"descricao\": \"Simulado completo com 10 questões.\",\n  \"ativo\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/v1/simulados/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "v1", "simulados", ""]
+            }
+          }
+        },
+        {
+          "name": "Adicionar questão ao simulado",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cod_questao\": 1\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/v1/simulados/1/questoes",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "v1", "simulados", "1", "questoes"]
+            }
+          }
+        },
+        {
+          "name": "Registrar resultado do simulado",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cod_usuario\": 1,\n  \"qtd_acertos\": 7,\n  \"qtd_erros\": 3\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/v1/simulados/1/resultados",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "v1", "simulados", "1", "resultados"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

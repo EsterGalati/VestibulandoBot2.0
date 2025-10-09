@@ -36,6 +36,7 @@ services:
       - ENV=prod
       - SECRET_KEY=${SECRET_KEY:-mude-esta-chave}
       - DATABASE_URL=sqlite:////data/vestibulando.db
+      - DATABASE_URL=sqlite:////data/vestibulando.db
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
       # ✅ Adicionar variáveis OAuth

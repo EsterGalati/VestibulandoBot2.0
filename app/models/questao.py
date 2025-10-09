@@ -1,56 +1,63 @@
-# app/models/questao.py
 from __future__ import annotations
-
-from typing import Dict
+from typing import Dict, List
 from app.extensions import db
 
 
 class QuestaoENEM(db.Model):
-    """Modelo que representa uma questão do ENEM."""
+    """Tabela principal de questões (ENEM, simulados, etc.)."""
 
-    __tablename__ = "questoes_enem"
+    __tablename__ = "TB_QUESTAO"
 
-    # -----------------------
-    # Colunas
-    # -----------------------
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    ano = db.Column(db.Integer, nullable=False, index=True)
-    pergunta = db.Column(db.Text, nullable=False)
-    opcao_a = db.Column(db.Text, nullable=False)
-    opcao_b = db.Column(db.Text, nullable=False)
-    opcao_c = db.Column(db.Text, nullable=False)
-    opcao_d = db.Column(db.Text, nullable=False)
-    opcao_e = db.Column(db.Text, nullable=False)
-    resposta_correta = db.Column(db.String(1), nullable=False)  # 'A'..'E'
+    cod_questao = db.Column("COD_QUESTAO", db.Integer, primary_key=True, autoincrement=True)
+    tx_questao = db.Column("TX_QUESTAO", db.Text, nullable=False)
+    ano_questao = db.Column("ANO_QUESTAO", db.Integer, nullable=False, index=True)
+    tx_resposta_correta = db.Column("TX_RESPOSTA_CORRETA", db.String(1), nullable=False)
 
-    # -----------------------
-    # Métodos de utilidade
-    # -----------------------
+    # Chave estrangeira da matéria
+    cod_materia = db.Column(
+        "COD_MATERIA",
+        db.Integer,
+        db.ForeignKey("TB_MATERIA.COD_MATERIA"),
+        nullable=False
+    )
+
+    # Relacionamento com matéria
+    materia = db.relationship("Materia", back_populates="questoes")
+
+    # Relacionamento 1:N com alternativas
+    alternativas = db.relationship(
+        "QuestaoAlternativa",
+        back_populates="questao",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
+    # Relacionamento 1:N com respostas
+    respostas = db.relationship(
+        "Resposta",
+        back_populates="questao",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
     def to_dict(self) -> Dict:
-        """Serializa a questão em dicionário (útil para APIs)."""
         return {
-            "id": self.id,
-            "ano": self.ano,
-            "pergunta": self.pergunta,
-            "opcoes": {
-                "A": self.opcao_a,
-                "B": self.opcao_b,
-                "C": self.opcao_c,
-                "D": self.opcao_d,
-                "E": self.opcao_e,
-            },
-            "resposta_correta": self.resposta_correta,
+            "cod_questao": self.cod_questao,
+            "tx_questao": self.tx_questao,
+            "ano_questao": self.ano_questao,
+            "tx_resposta_correta": self.tx_resposta_correta,
+            "cod_materia": self.cod_materia,
+            "materia": self.materia.nome_materia if self.materia else None,
+            "alternativas": [alt.to_dict() for alt in self.alternativas],
         }
 
     @classmethod
-    def by_ano(cls, ano: int) -> list["QuestaoENEM"]:
-        """Retorna todas as questões de um ano específico."""
-        return cls.query.filter_by(ano=ano).all()
+    def by_ano(cls, ano: int) -> List["QuestaoENEM"]:
+        return cls.query.filter_by(ano_questao=ano).all()
 
     @classmethod
-    def random(cls, limit: int = 1) -> list["QuestaoENEM"]:
-        """Retorna questões aleatórias (pode ser útil no modo desafio)."""
+    def random(cls, limit: int = 1) -> List["QuestaoENEM"]:
         return cls.query.order_by(db.func.random()).limit(limit).all()
 
-    def __repr__(self) -> str:  # debug/dev
-        return f"<QuestaoENEM id={self.id} ano={self.ano} resposta={self.resposta_correta}>"
+    def __repr__(self):
+        return f"<Questao cod={self.cod_questao} ano={self.ano_questao} materia={self.cod_materia}>"
