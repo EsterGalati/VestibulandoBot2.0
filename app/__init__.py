@@ -2,6 +2,7 @@
 from flask import Flask
 import os
 
+
 def create_app():
     print("🚀 Iniciando create_app...")
     app = Flask(__name__)
@@ -77,6 +78,10 @@ def create_app():
         from app.routes.auth import bp as auth_bp
         app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
         print("✅ Blueprint auth registrado com prefixo /api/v1/auth")
+        
+        from app.routes.chatbot import bp as chatbot_bp
+        app.register_blueprint(chatbot_bp, url_prefix='/api/v1/chatbot')
+        print("✅ Blueprint chatbot registrado com prefixo /api/v1/chatbot")
         
         # Se tiver outros blueprints, adicione aqui
         

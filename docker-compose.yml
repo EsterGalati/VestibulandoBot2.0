@@ -17,6 +17,7 @@ services:
       - DATABASE_URL=sqlite:////data/vestibulando.db
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
       # ✅ Adicionar variáveis OAuth
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
@@ -37,7 +38,8 @@ services:
       - SECRET_KEY=${SECRET_KEY:-mude-esta-chave}
       - DATABASE_URL=sqlite:////data/vestibulando.db
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:5173}
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173} 
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
       # ✅ Adicionar variáveis OAuth
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
@@ -65,6 +67,7 @@ services:
       - ENV=prod
       - SECRET_KEY=${SECRET_KEY:-mude-esta-chave}
       - DATABASE_URL=sqlite:////data/vestibulando.db
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     volumes:
       - db_data:/data
       - ./data:/seed:ro
