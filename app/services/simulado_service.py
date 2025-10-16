@@ -25,6 +25,7 @@ class SimuladoService:
             titulo=dados["titulo"].strip(),
             descricao=dados.get("descricao", "").strip(),
             ativo=bool(dados.get("ativo", True)),
+            cod_materia=dados.get("cod_materia"), 
         )
         db.session.add(sim)
         db.session.commit()
@@ -38,6 +39,7 @@ class SimuladoService:
         sim.titulo = dados.get("titulo", sim.titulo).strip()
         sim.descricao = dados.get("descricao", sim.descricao).strip()
         sim.ativo = bool(dados.get("ativo", sim.ativo))
+        sim.cod_materia = dados.get("cod_materia", sim.cod_materia)
         db.session.commit()
         return {"cod_simulado": sim.cod_simulado, "mensagem": "Simulado atualizado com sucesso."}
 
