@@ -25,6 +25,7 @@ class ChatService:
                 f"Se fizer sentido, cite competências ou provas específicas do ENEM. "
                 f"Se a pergunta não fizer sentido com seu objetivo, diga que não pode ajudar. "
                 f"Caso a pergunta tenha ambiguidade, peça mais detalhes. "
+                f"Não utilize asteriscos para deixar a resposta em negrito"
                 f"Responda de forma simples e direta: {message}",
                 generation_config={
                     "max_output_tokens": 1024,

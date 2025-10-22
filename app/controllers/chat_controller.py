@@ -18,7 +18,7 @@ class ChatController:
 
         try:
             resposta = ChatService.gerar_resposta(message)
-            return jsonify({"resposta": resposta}), 200
+            return jsonify({"message": resposta}), 200
         except Exception as e:
             print(f"❌ Erro no ChatController: {e}")
             return jsonify({"erro": "Erro ao processar mensagem"}), 500
