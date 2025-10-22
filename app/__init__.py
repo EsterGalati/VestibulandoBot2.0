@@ -85,6 +85,14 @@ def create_app():
         from app.routes.chat import bp as chat_bp
         app.register_blueprint(chat_bp, url_prefix="/api/v1/chat")
         print("✅ Blueprint chat registrado com prefixo /api/v1/chat")
+        
+        # Usuario
+        try:
+            from app.routes.usuario import bp as usuario_bp
+            app.register_blueprint(usuario_bp)
+            print("✅ Blueprint usuario registrado com prefixo /api/v1/usuario")
+        except Exception as e:
+            print(f"⚠️  Não foi possível registrar blueprint 'usuario': {e}")
 
         # Questões
         try:

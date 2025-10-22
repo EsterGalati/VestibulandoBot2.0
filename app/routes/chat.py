@@ -1,10 +1,7 @@
-from flask import Blueprint, request
-
+from flask import Blueprint
 from app.controllers.chat_controller import ChatController
 
-bp = Blueprint("chat", __name__)
+bp = Blueprint("bp", __name__)
 
-
-@bp.post("/perguntar")
-def perguntar():
-    return ChatController.perguntar(request.get_json(silent=True) or {})
+# Rota POST para gerar resposta do chat
+bp.route("/message", methods=["POST"])(ChatController.gerar_resposta)

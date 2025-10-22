@@ -18,6 +18,9 @@ from datetime import datetime
 
 app = create_app()
 
+# Configura a chave do GeminiAI no app
+app.config['GEMINI_API_KEY'] = os.environ.get('GEMINI_API_KEY')
+
 # ========== CONFIG EXTRA ==========
 app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",
@@ -248,6 +251,7 @@ print("=== CONFIGURAÇÕES CARREGADAS ===")
 print(f"GOOGLE_CLIENT_ID: {'✅ Configurado' if app.config.get('GOOGLE_CLIENT_ID') else '❌ Não configurado'}")
 print(f"GOOGLE_CLIENT_SECRET: {'✅ Configurado' if app.config.get('GOOGLE_CLIENT_SECRET') else '❌ Não configurado'}")
 print(f"SECRET_KEY: {'✅ Configurado' if app.config.get('SECRET_KEY') else '❌ Não configurado'}")
+print(f"GEMINI_API_KEY: {'✅ Configurado' if app.config.get('GEMINI_API_KEY') else '❌ Não configurado'}")
 print(f"FRONTEND_URL: {app.config.get('FRONTEND_URL')}")
 print("================================")
 

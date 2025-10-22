@@ -11,6 +11,7 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - CORS_ORIGINS=${CORS_ORIGINS}
       - FRONTEND_URL=${FRONTEND_URL}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     volumes:
       - db_data:/data
       - ./data:/seed:ro
