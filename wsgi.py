@@ -18,6 +18,9 @@ from datetime import datetime
 
 app = create_app()
 
+# Configura a chave do GeminiAI no app
+app.config['GEMINI_API_KEY'] = os.environ.get('GEMINI_API_KEY')
+
 # ========== CONFIG EXTRA ==========
 app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",
@@ -144,22 +147,48 @@ def import_dados(materias, simulados, questoes, encoding, truncate):
         # -------------------------
         df_simulados = safe_read_csv(simulados)
         total_simulados = 0
-        if df_simulados is not None and "titulo" in df_simulados.columns:
-            for _, s in df_simulados.iterrows():
-                sim = Simulado(
-                    titulo=str(s["titulo"]).strip(),
-                    descricao=str(s.get("descricao", "")).strip(),
-                    dt_criacao=datetime.fromisoformat(str(s["dt_criacao"]))
-                    if "dt_criacao" in s
-                    else datetime.utcnow(),
-                    ativo=bool(s.get("ativo", True)),
-                )
-                db.session.add(sim)
-                total_simulados += 1
-            db.session.commit()
-            click.secho(f"✅ {total_simulados} simulados importados.", fg="green")
-        else:
-            click.secho("⚠️ Nenhum dado de simulados encontrado.", fg="yellow")
+
+        if df_simulados is not None:
+            # 🔧 Corrige nomes de colunas com espaços ou maiúsculas
+            df_simulados.columns = [c.strip().lower() for c in df_simulados.columns]
+
+            if "titulo" in df_simulados.columns:
+                click.secho(f"🧩 Colunas CSV normalizadas: {list(df_simulados.columns)}", fg="cyan")
+
+                for _, s in df_simulados.iterrows():
+                    cod_materia_value = None
+
+                    # 🔧 Busca segura, mesmo que a coluna não exista
+                    cod_materia_raw = s.get("cod_materia")
+
+                    if pd.notna(cod_materia_raw):
+                        try:
+                            cod_materia_value = int(cod_materia_raw)
+                        except Exception as e:
+                            click.secho(f"⚠️ Erro ao converter cod_materia='{cod_materia_raw}': {e}", fg="red")
+
+                    click.secho(
+                        f"📘 Criando simulado '{s['titulo']}' com cod_materia={cod_materia_value}",
+                        fg="green"
+                    )
+
+                    sim = Simulado(
+                        titulo=str(s["titulo"]).strip(),
+                        descricao=str(s.get("descricao", "")).strip(),
+                        dt_criacao=datetime.fromisoformat(str(s["dt_criacao"]))
+                        if pd.notna(s.get("dt_criacao"))
+                        else datetime.utcnow(),
+                        ativo=str(s.get("ativo", True)).strip().lower() in ("true", "1", "t", "yes"),
+                        cod_materia=cod_materia_value,
+                    )
+
+                    db.session.add(sim)
+                    total_simulados += 1
+
+                db.session.commit()
+                click.secho(f"✅ {total_simulados} simulados importados (com cod_materia).", fg="green")
+            else:
+                click.secho("⚠️ Nenhum dado de simulados encontrado.", fg="yellow")
 
         # -------------------------
         # QUESTÕES
@@ -222,6 +251,7 @@ print("=== CONFIGURAÇÕES CARREGADAS ===")
 print(f"GOOGLE_CLIENT_ID: {'✅ Configurado' if app.config.get('GOOGLE_CLIENT_ID') else '❌ Não configurado'}")
 print(f"GOOGLE_CLIENT_SECRET: {'✅ Configurado' if app.config.get('GOOGLE_CLIENT_SECRET') else '❌ Não configurado'}")
 print(f"SECRET_KEY: {'✅ Configurado' if app.config.get('SECRET_KEY') else '❌ Não configurado'}")
+print(f"GEMINI_API_KEY: {'✅ Configurado' if app.config.get('GEMINI_API_KEY') else '❌ Não configurado'}")
 print(f"FRONTEND_URL: {app.config.get('FRONTEND_URL')}")
 print("================================")
 
