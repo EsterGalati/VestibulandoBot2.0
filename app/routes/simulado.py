@@ -17,3 +17,4 @@ simulado_bp.route("/<int:cod_simulado>/questoes", methods=["POST"])(SimuladoCont
 # --- RESULTADOS ---
 simulado_bp.route("/<int:cod_simulado>/resultados", methods=["GET"])(SimuladoController.listar_resultados)
 simulado_bp.route("/<int:cod_simulado>/resultados", methods=["POST"])(SimuladoController.registrar_resultado)
+simulado_bp.route("/resultados/usuario/<int:cod_usuario>", methods=["GET"])(SimuladoController.listar_resultados_por_usuario)

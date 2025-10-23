@@ -113,3 +113,22 @@ class SimuladoService:
         """Lista todos os resultados registrados para um simulado."""
         resultados = ResultadoSimulado.query.filter_by(cod_simulado=cod_simulado).all()
         return [r.to_dict() for r in resultados]
+    
+    @staticmethod
+    def listar_resultados_por_usuario(cod_usuario: int):
+        """Lista todos os resultados de simulados feitos por um usuário específico."""
+        resultados = (
+            ResultadoSimulado.query
+            .join(Simulado, Simulado.cod_simulado == ResultadoSimulado.cod_simulado)
+            .filter(ResultadoSimulado.cod_usuario == cod_usuario)
+            .order_by(ResultadoSimulado.cod_resultado.desc())
+            .all()
+        )
+        return [
+            {
+                **r.to_dict(),
+                "titulo_simulado": r.simulado.titulo if r.simulado else None,
+                "descricao_simulado": r.simulado.descricao if r.simulado else None,
+            }
+            for r in resultados
+        ]

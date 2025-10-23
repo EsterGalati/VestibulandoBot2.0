@@ -68,3 +68,12 @@ class SimuladoController:
     def listar_resultados(cod_simulado):
         resultados = SimuladoService.listar_resultados(cod_simulado)
         return jsonify(resultados), 200
+    
+    @staticmethod
+    def listar_resultados_por_usuario(cod_usuario):
+        from app.services.simulado_service import SimuladoService
+        resultados = SimuladoService.listar_resultados_por_usuario(cod_usuario)
+        if not resultados:
+            return {"mensagem": "Nenhum resultado encontrado para este usuário."}, 404
+        return resultados, 200
+
