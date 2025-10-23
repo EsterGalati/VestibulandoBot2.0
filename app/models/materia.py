@@ -1,5 +1,6 @@
 from __future__ import annotations
-from app.extensions import db 
+from app.extensions import db
+from app.models.simulado_materia import SimuladoMateria
 
 class Materia(db.Model):
     """Tabela de matérias do ENEM."""
@@ -16,12 +17,18 @@ class Materia(db.Model):
         lazy=True
     )
 
-    # 🔽 Adiciona o relacionamento reverso
-    simulados = db.relationship(
-        "Simulado",
+    materia_simulados = db.relationship(
+        "SimuladoMateria",
         back_populates="materia",
         cascade="all, delete-orphan",
         lazy=True
+    )
+
+    simulados = db.relationship(
+        "Simulado",
+        secondary=lambda: SimuladoMateria.__table__,
+        back_populates="materias",
+        lazy="joined"
     )
 
     def to_dict(self):
