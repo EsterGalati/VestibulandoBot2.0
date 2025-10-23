@@ -25,8 +25,8 @@ class UsuarioController:
     def get_todos_usuarios():
         """Lista todos os usuários (exemplo: rota protegida para admins)."""
         try:
-            if not getattr(current_user, "is_admin", False):
-                return jsonify({"erro": "Acesso negado"}), 403
+            # if not getattr(current_user, "is_admin", False):
+            #     return jsonify({"erro": "Acesso negado"}), 403
 
             usuarios = UsuarioService.get_todos_usuarios()
             return jsonify(usuarios), 200

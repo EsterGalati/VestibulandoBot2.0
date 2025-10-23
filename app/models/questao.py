@@ -32,14 +32,6 @@ class QuestaoENEM(db.Model):
         cascade="all, delete-orphan"
     )
 
-    # Relacionamento 1:N com respostas
-    respostas = db.relationship(
-        "Resposta",
-        back_populates="questao",
-        lazy=True,
-        cascade="all, delete-orphan"
-    )
-
     def to_dict(self) -> Dict:
         return {
             "cod_questao": self.cod_questao,

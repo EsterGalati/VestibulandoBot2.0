@@ -102,14 +102,6 @@ def create_app():
         except Exception as e:
             print(f"⚠️  Não foi possível registrar blueprint 'questao': {e}")
 
-        # Respostas
-        try:
-            from app.routes.resposta import resposta_bp
-            app.register_blueprint(resposta_bp)
-            print("✅ Blueprint resposta registrado com prefixo /api/v1/respostas")
-        except Exception as e:
-            print(f"⚠️  Não foi possível registrar blueprint 'resposta': {e}")
-
         # Matérias
         try:
             from app.routes.materia import materia_bp
