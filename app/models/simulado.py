@@ -6,7 +6,6 @@ from app.models.simulado_materia import SimuladoMateria
 
 class Simulado(db.Model):
     """Tabela de simulados disponíveis (ENEM, blocos, testes rápidos etc.)."""
-
     __tablename__ = "TB_SIMULADO"
 
     cod_simulado = db.Column("COD_SIMULADO", db.Integer, primary_key=True, autoincrement=True)
@@ -19,14 +18,16 @@ class Simulado(db.Model):
         "SimuladoMateria",
         back_populates="simulado",
         cascade="all, delete-orphan",
-        lazy=True
+        lazy=True,
+        overlaps="materias,materia_simulados"
     )
 
     materias = db.relationship(
         "Materia",
         secondary=lambda: SimuladoMateria.__table__,
         back_populates="simulados",
-        lazy="joined"
+        lazy="joined",
+        overlaps="simulado_materias,materia_simulados"
     )
 
     questoes = db.relationship(

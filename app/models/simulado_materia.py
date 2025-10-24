@@ -2,7 +2,6 @@ from app.extensions import db
 
 class SimuladoMateria(db.Model):
     """Tabela de associação entre Simulado e Materia (relação N:N)."""
-
     __tablename__ = "TB_SIMULADO_MATERIA"
 
     cod_simulado = db.Column(
@@ -11,7 +10,6 @@ class SimuladoMateria(db.Model):
         db.ForeignKey("TB_SIMULADO.COD_SIMULADO", ondelete="CASCADE"),
         primary_key=True
     )
-
     cod_materia = db.Column(
         "COD_MATERIA",
         db.Integer,
