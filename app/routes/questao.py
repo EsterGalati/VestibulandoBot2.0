@@ -3,7 +3,8 @@ from app.controllers.questao_controller import QuestaoController
 
 questao_bp = Blueprint("questao_bp", __name__, url_prefix="/api/v1/questoes")
 
-# CRUD de questões
+questao_bp.route("/materia/<int:cod_materia>", methods=["GET"])(QuestaoController.listar_por_materia)
+
 questao_bp.route("/", methods=["GET"])(QuestaoController.listar)
 questao_bp.route("/<int:cod_questao>", methods=["GET"])(QuestaoController.buscar)
 questao_bp.route("/", methods=["POST"])(QuestaoController.criar)

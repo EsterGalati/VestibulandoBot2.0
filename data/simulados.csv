@@ -1,3 +1,8 @@
-titulo, descricao, dt_criacao, ativo, cod_materia
-Simulado ENEM 2025, Treino de prova completa, 2025-10-01, True, 4
-Mini Simulado, Revisão de matemática, 2025-11-01, True, 1
+titulo,descricao,dt_criacao,ativo,cod_materias
+Simulado ENEM,"Abrange todas as áreas",2025-10-01,True,"1,2,3,4"
+Simulado Bloco 1,"Linguagens + Humanas",2025-10-01,True,"1,4"
+Simulado Bloco 2,"Matemática + Natureza",2025-10-01,True,"2,3"
+Simulado Linguagens e suas Tecnologias,"Somente Linguagens",2025-10-01,True,"1"
+Simulado Matemática e suas Tecnologias,"Somente Matemática",2025-10-01,True,"2"
+Simulado Ciências da Natureza e suas Tecnologias,"Somente Natureza",2025-10-01,True,"3"
+Simulado Ciências Humanas e Sociais Aplicadas,"Somente Humanas",2025-10-01,True,"4"

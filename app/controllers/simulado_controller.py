@@ -40,6 +40,32 @@ class SimuladoController:
         if not deletado:
             return jsonify({"erro": "Simulado não encontrado."}), 404
         return jsonify(deletado), 200
+    
+    # -------------------------
+    # MATERIAS DO SIMULADO
+    # -------------------------
+    @staticmethod
+    def vincular_materias(cod_simulado: int, cod_materias: list[int]):
+        """Vincula uma lista de matérias a um simulado existente."""
+        simulado = Simulado.query.get(cod_simulado)
+        if not simulado:
+            return {"erro": "Simulado não encontrado."}
+
+        if not cod_materias:
+            return {"erro": "Nenhuma matéria informada."}
+
+        materias = Materia.query.filter(Materia.cod_materia.in_(cod_materias)).all()
+        if not materias:
+            return {"erro": "Nenhuma matéria válida encontrada."}
+
+        simulado.materias = materias
+        db.session.commit()
+
+        return {
+            "mensagem": f"{len(materias)} matéria(s) vinculada(s) com sucesso.",
+            "cod_simulado": simulado.cod_simulado,
+            "materias_vinculadas": [m.to_dict() for m in materias],
+        }
 
     # -------------------------
     # QUESTÕES DO SIMULADO
@@ -68,3 +94,12 @@ class SimuladoController:
     def listar_resultados(cod_simulado):
         resultados = SimuladoService.listar_resultados(cod_simulado)
         return jsonify(resultados), 200
+    
+    @staticmethod
+    def listar_resultados_por_usuario(cod_usuario):
+        from app.services.simulado_service import SimuladoService
+        resultados = SimuladoService.listar_resultados_por_usuario(cod_usuario)
+        if not resultados:
+            return {"mensagem": "Nenhum resultado encontrado para este usuário."}, 404
+        return resultados, 200
+

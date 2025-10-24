@@ -16,13 +16,6 @@ class Usuario(UserMixin, db.Model):
     senha_hash = db.Column("SENHA_HASH", db.String(255), nullable=False)
     is_admin = db.Column("IS_ADMIN", db.Boolean, nullable=False, default=False, index=True)
 
-    respostas = db.relationship(
-        "Resposta",
-        back_populates="usuario",
-        cascade="all, delete-orphan",
-        lazy=True
-    )
-
     resultados_simulados = db.relationship(
         "ResultadoSimulado",
         back_populates="usuario",

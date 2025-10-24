@@ -13,7 +13,6 @@ class QuestaoENEM(db.Model):
     ano_questao = db.Column("ANO_QUESTAO", db.Integer, nullable=False, index=True)
     tx_resposta_correta = db.Column("TX_RESPOSTA_CORRETA", db.String(1), nullable=False)
 
-    # Chave estrangeira da matéria
     cod_materia = db.Column(
         "COD_MATERIA",
         db.Integer,
@@ -21,10 +20,8 @@ class QuestaoENEM(db.Model):
         nullable=False
     )
 
-    # Relacionamento com matéria
     materia = db.relationship("Materia", back_populates="questoes")
 
-    # Relacionamento 1:N com alternativas
     alternativas = db.relationship(
         "QuestaoAlternativa",
         back_populates="questao",
@@ -32,24 +29,20 @@ class QuestaoENEM(db.Model):
         cascade="all, delete-orphan"
     )
 
-    # Relacionamento 1:N com respostas
-    respostas = db.relationship(
-        "Resposta",
-        back_populates="questao",
-        lazy=True,
-        cascade="all, delete-orphan"
-    )
-
-    def to_dict(self) -> Dict:
-        return {
+    def to_dict(self, incluir_alternativas: bool = True) -> Dict:
+        data = {
             "cod_questao": self.cod_questao,
             "tx_questao": self.tx_questao,
             "ano_questao": self.ano_questao,
             "tx_resposta_correta": self.tx_resposta_correta,
             "cod_materia": self.cod_materia,
             "materia": self.materia.nome_materia if self.materia else None,
-            "alternativas": [alt.to_dict() for alt in self.alternativas],
         }
+
+        if incluir_alternativas:
+            data["alternativas"] = [alt.to_dict() for alt in self.alternativas]
+
+        return data
 
     @classmethod
     def by_ano(cls, ano: int) -> List["QuestaoENEM"]:

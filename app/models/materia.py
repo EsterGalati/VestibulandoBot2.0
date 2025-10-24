@@ -1,9 +1,9 @@
 from __future__ import annotations
-from app.extensions import db 
+from app.extensions import db
+from app.models.simulado_materia import SimuladoMateria
 
 class Materia(db.Model):
     """Tabela de matérias do ENEM."""
-
     __tablename__ = "TB_MATERIA"
 
     cod_materia = db.Column("COD_MATERIA", db.Integer, primary_key=True, autoincrement=True)
@@ -16,12 +16,20 @@ class Materia(db.Model):
         lazy=True
     )
 
-    # 🔽 Adiciona o relacionamento reverso
-    simulados = db.relationship(
-        "Simulado",
+    materia_simulados = db.relationship(
+        "SimuladoMateria",
         back_populates="materia",
         cascade="all, delete-orphan",
-        lazy=True
+        lazy=True,
+        overlaps="simulados,materias,simulado_materias"
+    )
+
+    simulados = db.relationship(
+        "Simulado",
+        secondary=lambda: SimuladoMateria.__table__,
+        back_populates="materias",
+        lazy="joined",
+        overlaps="materia_simulados,simulado_materias"
     )
 
     def to_dict(self):

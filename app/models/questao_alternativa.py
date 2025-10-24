@@ -15,12 +15,6 @@ class QuestaoAlternativa(db.Model):
 
     # Relacionamentos 1:N e N:1
     questao = db.relationship("QuestaoENEM", back_populates="alternativas")
-    respostas = db.relationship(
-        "Resposta",
-        back_populates="alternativa",
-        lazy=True,
-        cascade="all, delete-orphan"
-    )
 
     def to_dict(self) -> Dict:
         return {

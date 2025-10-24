@@ -4,15 +4,23 @@ from app.models.questao_alternativa import QuestaoAlternativa
 
 
 class QuestaoService:
-    """Serviço para manipular questões e alternativas (TB_QUESTAO / TB_QUESTAO_ALTERNATIVA)."""
+    """Serviço para manipular questões e alternativas."""
 
-    # ------------------------
-    # QUESTÕES
-    # ------------------------
     @staticmethod
     def listar_todas():
         """Retorna todas as questões com alternativas."""
         questoes = QuestaoENEM.query.all()
+        return QuestaoService._formatar_lista(questoes)
+
+    @staticmethod
+    def listar_por_materia(cod_materia: int):
+        """Retorna as questões filtradas por matéria."""
+        questoes = QuestaoENEM.query.filter_by(cod_materia=cod_materia).all()
+        return QuestaoService._formatar_lista(questoes)
+
+    @staticmethod
+    def _formatar_lista(questoes):
+        """Formata lista de questões com alternativas."""
         resultado = []
         for q in questoes:
             resultado.append({
@@ -64,7 +72,6 @@ class QuestaoService:
         db.session.add(q)
         db.session.flush()
 
-        alternativas = []
         for alt in dados.get("alternativas", []):
             nova_alt = QuestaoAlternativa(
                 cod_questao=q.cod_questao,
@@ -72,10 +79,9 @@ class QuestaoService:
                 tx_texto=alt["tx_texto"].strip(),
             )
             db.session.add(nova_alt)
-            alternativas.append(nova_alt)
 
         db.session.commit()
-        return {"cod_questao": q.cod_questao, "total_alternativas": len(alternativas)}
+        return {"cod_questao": q.cod_questao}
 
     @staticmethod
     def atualizar(cod_questao: int, dados: dict):
@@ -87,9 +93,10 @@ class QuestaoService:
         questao.tx_questao = dados.get("tx_questao", questao.tx_questao)
         questao.cod_materia = int(dados.get("cod_materia", questao.cod_materia))
         questao.ano_questao = int(dados.get("ano_questao", questao.ano_questao))
-        questao.tx_resposta_correta = dados.get("tx_resposta_correta", questao.tx_resposta_correta).upper()
+        questao.tx_resposta_correta = dados.get(
+            "tx_resposta_correta", questao.tx_resposta_correta
+        ).upper()
 
-        # Atualiza alternativas (deleta e recria)
         if "alternativas" in dados:
             QuestaoAlternativa.query.filter_by(cod_questao=questao.cod_questao).delete()
             for alt in dados["alternativas"]:
