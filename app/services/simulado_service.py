@@ -1,6 +1,6 @@
 from datetime import datetime
 from app.extensions import db
-from app.models import Simulado, SimuladoQuestao, ResultadoSimulado, QuestaoENEM
+from app.models import Simulado, SimuladoMateria, SimuladoQuestao, ResultadoSimulado, QuestaoENEM
 
 
 class SimuladoService:
@@ -21,26 +21,47 @@ class SimuladoService:
 
     @staticmethod
     def criar_simulado(dados: dict):
+        """Cria um novo simulado e vincula matérias via tabela associativa."""
+        from app.models.simulado_materia import SimuladoMateria
+
+        cod_materias = dados.get("cod_materias", [])
+
         sim = Simulado(
             titulo=dados["titulo"].strip(),
             descricao=dados.get("descricao", "").strip(),
             ativo=bool(dados.get("ativo", True)),
-            cod_materia=dados.get("cod_materia"), 
         )
+
         db.session.add(sim)
+        db.session.flush()
+
+        for cod_materia in cod_materias:
+            db.session.add(
+                SimuladoMateria(
+                    cod_simulado=sim.cod_simulado,
+                    cod_materia=cod_materia
+                )
+            )
+
         db.session.commit()
-        return {"cod_simulado": sim.cod_simulado, "mensagem": "Simulado criado com sucesso."}
+
+        return {
+            "cod_simulado": sim.cod_simulado,
+            "materias_vinculadas": len(cod_materias),
+            "mensagem": "Simulado criado com sucesso."
+        }
 
     @staticmethod
     def atualizar_simulado(cod_simulado: int, dados: dict):
         sim = Simulado.query.get(cod_simulado)
         if not sim:
             return None
+
         sim.titulo = dados.get("titulo", sim.titulo).strip()
         sim.descricao = dados.get("descricao", sim.descricao).strip()
         sim.ativo = bool(dados.get("ativo", sim.ativo))
-        sim.cod_materia = dados.get("cod_materia", sim.cod_materia)
         db.session.commit()
+
         return {"cod_simulado": sim.cod_simulado, "mensagem": "Simulado atualizado com sucesso."}
 
     @staticmethod
@@ -73,7 +94,7 @@ class SimuladoService:
     def listar_questoes(cod_simulado: int):
         """Lista todas as questões vinculadas a um simulado."""
         questoes = SimuladoQuestao.listar_por_simulado(cod_simulado)
-        return [q.to_dict(incluir_questao=True) for q in questoes]
+        return questoes
 
     # -------------------------
     # RESULTADOS
@@ -81,9 +102,6 @@ class SimuladoService:
     @staticmethod
     def registrar_resultado(cod_simulado: int, dados: dict):
         """Registra o resultado de um simulado."""
-        from app.models import ResultadoSimulado
-        from app.extensions import db
-
         try:
             resultado = ResultadoSimulado(
                 cod_simulado=cod_simulado,
@@ -110,13 +128,11 @@ class SimuladoService:
 
     @staticmethod
     def listar_resultados(cod_simulado: int):
-        """Lista todos os resultados registrados para um simulado."""
         resultados = ResultadoSimulado.query.filter_by(cod_simulado=cod_simulado).all()
         return [r.to_dict() for r in resultados]
-    
+
     @staticmethod
     def listar_resultados_por_usuario(cod_usuario: int):
-        """Lista todos os resultados de simulados feitos por um usuário específico."""
         resultados = (
             ResultadoSimulado.query
             .join(Simulado, Simulado.cod_simulado == ResultadoSimulado.cod_simulado)
