@@ -11,6 +11,14 @@ class QuestaoController:
         return jsonify(questoes), 200
 
     @staticmethod
+    def listar_por_materia(cod_materia):
+        """Lista questões filtradas por matéria."""
+        questoes = QuestaoService.listar_por_materia(cod_materia)
+        if not questoes:
+            return jsonify([]), 200  # devolve lista vazia em vez de 404
+        return jsonify(questoes), 200
+
+    @staticmethod
     def buscar(cod_questao):
         questao = QuestaoService.buscar_por_id(cod_questao)
         if not questao:
