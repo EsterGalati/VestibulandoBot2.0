@@ -12,3 +12,6 @@ bp.route("/", methods=["GET"])(UsuarioController.get_todos_usuarios)
 
 # GET /api/v1/usuario → retorna alunos de um professor
 bp.route("/professor/<int:cod_professor>/alunos", methods=["GET"])(UsuarioController.get_alunos_do_professor)
+
+# POST /api/v1/usuario/professor/<int:cod_professor>/associar-alunos
+bp.route("/professor/<int:cod_professor>/associar-alunos", methods=["POST"])(UsuarioController.associar_alunos_ao_professor)

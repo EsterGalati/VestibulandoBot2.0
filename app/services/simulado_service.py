@@ -1,7 +1,7 @@
 from datetime import datetime
 from app.extensions import db
-from app.models import Simulado, SimuladoMateria, SimuladoQuestao, ResultadoSimulado, QuestaoENEM
-
+from sqlalchemy.orm import joinedload
+from app.models import Simulado, SimuladoMateria, SimuladoQuestao, ResultadoSimulado, QuestaoENEM, Materia
 
 class SimuladoService:
     """Serviço unificado para Simulado, Questões vinculadas e Resultados."""
@@ -133,18 +133,65 @@ class SimuladoService:
 
     @staticmethod
     def listar_resultados_por_usuario(cod_usuario: int):
+        """
+        Retorna os resultados do usuário já com dados do simulado
+        e suas matérias para permitir filtro no front.
+        """
         resultados = (
             ResultadoSimulado.query
-            .join(Simulado, Simulado.cod_simulado == ResultadoSimulado.cod_simulado)
             .filter(ResultadoSimulado.cod_usuario == cod_usuario)
-            .order_by(ResultadoSimulado.cod_resultado.desc())
+            .options(
+                joinedload(ResultadoSimulado.simulado)
+                .joinedload(Simulado.materias)  # carrega materias
+            )
+            .order_by(ResultadoSimulado.dt_finalizacao.desc())
             .all()
         )
+
+        payload = []
+        for r in resultados:
+            sim = r.simulado
+            materias = sim.materias if sim else []
+            payload.append({
+                "cod_resultado": r.cod_resultado,
+                "cod_usuario": r.cod_usuario,
+                "cod_simulado": r.cod_simulado,
+                "qtd_acertos": r.qtd_acertos,
+                "qtd_erros": r.qtd_erros,
+                "nota_final": r.nota_final,
+                "dt_finalizacao": r.dt_finalizacao.isoformat() if r.dt_finalizacao else None,
+                "simulado": {
+                    "cod_simulado": sim.cod_simulado if sim else None,
+                    "titulo": sim.titulo if sim else None,
+                    "descricao": sim.descricao if sim else None,
+                    "cod_materias": [m.cod_materia for m in materias],
+                    "nomes_materias": [m.nome_materia for m in materias],
+                }
+            })
+        return payload
+        """
+        Lista os resultados de um usuário, com filtros opcionais por simulado e matéria.
+        - cod_simulado: retorna resultados apenas desse simulado
+        - cod_materia: retorna resultados apenas de simulados que incluam essa matéria
+        """
+        query = db.session.query(ResultadoSimulado).join(Simulado).filter(ResultadoSimulado.cod_usuario == cod_usuario)
+
+        # 🔹 Filtro por simulado
+        if cod_simulado:
+            query = query.filter(ResultadoSimulado.cod_simulado == cod_simulado)
+
+        # 🔹 Filtro por matéria (via relação N:N)
+        if cod_materia:
+            query = query.join(SimuladoMateria, SimuladoMateria.cod_simulado == Simulado.cod_simulado)
+            query = query.filter(SimuladoMateria.cod_materia == cod_materia)
+
+        resultados = query.order_by(ResultadoSimulado.dt_finalizacao.desc()).all()
+
         return [
             {
                 **r.to_dict(),
                 "titulo_simulado": r.simulado.titulo if r.simulado else None,
-                "descricao_simulado": r.simulado.descricao if r.simulado else None,
+                "materias": [m.nome_materia for m in r.simulado.materias] if r.simulado else [],
             }
             for r in resultados
         ]

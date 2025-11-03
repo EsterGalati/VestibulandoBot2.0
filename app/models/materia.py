@@ -21,7 +21,7 @@ class Materia(db.Model):
         back_populates="materia",
         cascade="all, delete-orphan",
         lazy=True,
-        overlaps="simulados,materias,simulado_materias"
+        overlaps="simulados,materias,simulado_materias,simulado"
     )
 
     simulados = db.relationship(
@@ -29,7 +29,7 @@ class Materia(db.Model):
         secondary=lambda: SimuladoMateria.__table__,
         back_populates="materias",
         lazy="joined",
-        overlaps="materia_simulados,simulado_materias"
+        overlaps="materia_simulados,simulado_materias,materia,simulado"
     )
 
     def to_dict(self):
