@@ -19,7 +19,7 @@ class Simulado(db.Model):
         back_populates="simulado",
         cascade="all, delete-orphan",
         lazy=True,
-        overlaps="materias,materia_simulados"
+        overlaps="materias,materia_simulados,materia"
     )
 
     materias = db.relationship(
@@ -27,7 +27,7 @@ class Simulado(db.Model):
         secondary=lambda: SimuladoMateria.__table__,
         back_populates="simulados",
         lazy="joined",
-        overlaps="simulado_materias,materia_simulados"
+        overlaps="simulado_materias,materia_simulados,simulado,materia"
     )
 
     questoes = db.relationship(

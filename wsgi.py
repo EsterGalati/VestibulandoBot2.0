@@ -72,14 +72,12 @@ def db_reset():
 @click.option("--questoes",   default="data/enem_questoes.csv",   show_default=True)
 @click.option("--simulados-questoes", default="data/simulados_questoes.csv", show_default=True,
               help="CSV de associação entre simulados e questões")
-@click.option("--relacoes",   default="data/rel_prof_aluno.csv",  show_default=True,
-              help="CSV de vínculos professor-aluno")
 @click.option("--encoding",   default="utf-8",                    show_default=True)
 @click.option("--truncate/--no-truncate", default=True,           show_default=True,
               help="Trunca questões/simulados/matérias")
 @click.option("--truncate-usuarios/--no-truncate-usuarios", default=False, show_default=True,
               help="Opcional: trunca TB_USUARIO antes de importar")
-def import_dados(usuarios, materias, simulados, questoes, simulados_questoes, relacoes, encoding, truncate, truncate_usuarios):
+def import_dados(usuarios, materias, simulados, questoes, simulados_questoes, encoding, truncate, truncate_usuarios):
     """
     Importa dados base do sistema:
       • Usuários (CSV)
@@ -261,22 +259,6 @@ def import_dados(usuarios, materias, simulados, questoes, simulados_questoes, re
                 click.secho(f"✅ {total_links} associações Simulado ↔ Questão importadas.", fg="green")
             else:
                 click.secho("⚠️ CSV de simulados_questoes faltando colunas necessárias.", fg="yellow")
-
-        # =========================
-        # RELAÇÕES PROF-ALUNO
-        # =========================
-        df_rel = safe_read_csv(relacoes)
-        if df_rel is not None:
-            df_rel.columns = [c.strip().lower() for c in df_rel.columns]
-            for r in df_rel.to_dict("records"):
-                try:
-                    prof_id = int(r.get("cod_usuario_prof"))
-                    aluno_id = int(r.get("cod_usuario_aluno"))
-                    db.session.add(RelProfAluno(cod_usuario_prof=prof_id, cod_usuario_aluno=aluno_id))
-                except Exception:
-                    continue
-            db.session.commit()
-            click.secho(f"✅ Relações professor-aluno importadas.", fg="green")
 
         click.secho("🎉 Importação concluída com sucesso!", fg="cyan")
 

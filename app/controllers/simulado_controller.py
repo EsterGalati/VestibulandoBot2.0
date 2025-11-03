@@ -98,8 +98,26 @@ class SimuladoController:
     @staticmethod
     def listar_resultados_por_usuario(cod_usuario):
         from app.services.simulado_service import SimuladoService
-        resultados = SimuladoService.listar_resultados_por_usuario(cod_usuario)
-        if not resultados:
-            return {"mensagem": "Nenhum resultado encontrado para este usuário."}, 404
-        return resultados, 200
+        dados = SimuladoService.listar_resultados_por_usuario(cod_usuario)
+        if not dados:
+                return jsonify({"mensagem": "Nenhum resultado encontrado para este usuário."}), 404
+        return jsonify(dados), 200
 
+        """Retorna resultados de um usuário filtrados por simulado e/ou matéria."""
+        try:
+            cod_simulado = request.args.get("cod_simulado", type=int)
+            cod_materia = request.args.get("cod_materia", type=int)
+
+            resultados = SimuladoService.listar_resultados_filtrados(
+                cod_usuario=cod_usuario,
+                cod_simulado=cod_simulado,
+                cod_materia=cod_materia
+            )
+
+            if not resultados:
+                return jsonify({"mensagem": "Nenhum resultado encontrado com esses filtros."}), 404
+            return jsonify(resultados), 200
+
+        except Exception as e:
+            print(f"❌ Erro em listar_resultados_filtrados: {e}")
+            return jsonify({"erro": "Erro interno ao buscar resultados filtrados."}), 500
