@@ -7,6 +7,8 @@ from app.models.resultado_simulado import ResultadoSimulado
 from app.models.simulado import Simulado
 from app.models.materia import Materia
 from app.extensions import db
+import re
+from sqlalchemy.exc import IntegrityError
 
 class UsuarioService:
     """Serviço para operações relacionadas a usuários."""
@@ -141,3 +143,62 @@ class UsuarioService:
             "professor": cod_professor,
             "alunos_associados": alunos_ids,
         }
+
+    _email_re = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
+
+    @staticmethod
+    def _validar_email(email: str) -> bool:
+        return bool(email and UsuarioService._email_re.match(email))
+
+    @staticmethod
+    def _buscar_por_id(cod_usuario: int) -> Optional[Usuario]:
+        return Usuario.query.get(cod_usuario)
+
+    @staticmethod
+    def _email_em_uso(email: str, ignorar_id: Optional[int] = None) -> bool:
+        q = Usuario.query.filter(Usuario.email.ilike(email))
+        if ignorar_id:
+            q = q.filter(Usuario.cod_usuario != ignorar_id)
+        return db.session.query(q.exists()).scalar()
+
+    @staticmethod
+    def atualizar_perfil(*, target_id: int, nome: str, email: str) -> Dict:
+        nome  = (nome or "").strip()
+        email = (email or "").strip().lower()
+
+        if not nome:
+            return {"erro": "Nome é obrigatório."}
+        if not UsuarioService._validar_email(email):
+            return {"erro": "E-mail inválido."}
+        if UsuarioService._email_em_uso(email, ignorar_id=target_id):
+            return {"erro": "E-mail já está em uso por outro usuário."}
+
+        usuario = UsuarioService._buscar_por_id(target_id)
+        if not usuario:
+            return {"erro": "Usuário não encontrado."}
+
+        if hasattr(usuario, "nome"):
+            usuario.nome = nome
+        if hasattr(usuario, "nome_usuario"):
+            usuario.nome_usuario = nome
+        usuario.email = email
+
+        try:
+            db.session.add(usuario)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            return {"erro": "Conflito de dados ao salvar (integridade)."}
+        except Exception as e:
+            db.session.rollback()
+            return {"erro": f"Erro inesperado ao salvar: {e}"}
+
+        try:
+            return usuario.to_dict()
+        except Exception:
+            return {
+                "cod_usuario": getattr(usuario, "cod_usuario", None),
+                "nome_usuario": getattr(usuario, "nome_usuario", None) or getattr(usuario, "nome", None),
+                "email": getattr(usuario, "email", None),
+                "is_admin": bool(getattr(usuario, "is_admin", False)),
+            }
