@@ -25,6 +25,7 @@ services:
     volumes:
       - db_data:/data
       - ./data:/seed:ro
+      - ./api/documents:/app/documents
     ports:
       - "5000:5000"
 
@@ -48,6 +49,7 @@ services:
     volumes:
       - db_data:/data
       - ./data:/seed:ro
+      - ./api/documents:/app/documents
     ports:
       - "8000:8000"
     healthcheck:
@@ -71,6 +73,7 @@ services:
     volumes:
       - db_data:/data
       - ./data:/seed:ro
+      - ./api/documents:/app/documents
     profiles: ["seed"]
 
 volumes:
