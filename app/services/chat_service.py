@@ -1,4 +1,4 @@
-from app.services.rag_memoria import rag
+from app.services.rag_service import rag
 import os
 import google.generativeai as genai
 
@@ -14,7 +14,6 @@ class ChatService:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel("gemini-2.5-flash")
 
-        #Buscar contexto local via RAG
         try:
             contexto = rag.buscar(message)
         except Exception as e:
@@ -26,8 +25,8 @@ class ChatService:
 
         prompt = f"""
 Você é uma assistente de estudos para o ENEM. 
-Responda em até um parágrafo curto, em português do Brasil, 
-Não utilize asteriscos para deixar a resposta em negrito
+Responda em até um parágrafo curto, em português do Brasil.
+Não utilize asteriscos para deixar a resposta em negrito.
 
 USE EXCLUSIVAMENTE O CONTEXTO ABAIXO para responder a pergunta.
 Se a resposta não estiver no contexto, diga APENAS:
@@ -51,7 +50,6 @@ Se a resposta não estiver no contexto, diga APENAS:
                 }
             )
 
-            # Extrair a resposta gerada
             for cand in response.candidates:
                 parts = [p.text for p in cand.content.parts if hasattr(p, "text")]
                 if parts:
