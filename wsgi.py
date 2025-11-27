@@ -66,6 +66,7 @@ def db_reset():
 # ==============================================================
 
 @app.cli.command("import-dados")
+@click.option("--enem-anos", default="", help="Anos do ENEM a importar (ex: 2020,2021)") # <-- NOVA OPÇÃO
 @click.option("--usuarios",   default="data/usuarios.csv",        show_default=True)
 @click.option("--materias",   default="data/materias.csv",        show_default=True)
 @click.option("--simulados",  default="data/simulados.csv",       show_default=True)
@@ -77,7 +78,7 @@ def db_reset():
               help="Trunca questões/simulados/matérias")
 @click.option("--truncate-usuarios/--no-truncate-usuarios", default=False, show_default=True,
               help="Opcional: trunca TB_USUARIO antes de importar")
-def import_dados(usuarios, materias, simulados, questoes, simulados_questoes, encoding, truncate, truncate_usuarios):
+def import_dados(usuarios, materias, simulados, questoes, simulados_questoes, encoding, truncate, truncate_usuarios, enem_anos):
     """
     Importa dados base do sistema:
       • Usuários (CSV)
@@ -87,20 +88,6 @@ def import_dados(usuarios, materias, simulados, questoes, simulados_questoes, en
       • Vínculos Professor-Aluno
       • Associação Simulado ↔ Questões
     """
-
-    from app.models import (
-        RelProfAluno,
-        Materia,
-        Simulado,
-        QuestaoENEM,
-        QuestaoAlternativa,
-        Usuario,
-        SimuladoQuestao
-    )
-
-    from datetime import datetime
-    import pandas as pd
-    from pathlib import Path
 
     def safe_read_csv(path: str):
         """Lê CSV com tratamento de encoding e erros amigáveis."""
@@ -204,6 +191,7 @@ def import_dados(usuarios, materias, simulados, questoes, simulados_questoes, en
                     materias=materias_objs,
                 )
                 db.session.add(sim)
+                db.session.flush()
                 total_simulados += 1
             db.session.commit()
             click.secho(f"✅ {total_simulados} simulados importados.", fg="green")
@@ -259,6 +247,33 @@ def import_dados(usuarios, materias, simulados, questoes, simulados_questoes, en
                 click.secho(f"✅ {total_links} associações Simulado ↔ Questão importadas.", fg="green")
             else:
                 click.secho("⚠️ CSV de simulados_questoes faltando colunas necessárias.", fg="yellow")
+
+        click.secho("🎉 Importação concluída com sucesso!", fg="cyan")
+        
+        # =========================
+        # QUESTÕES ENEM (API)
+        # =========================
+        if enem_anos:
+            from app.services.questao_service import QuestaoService
+            
+            anos = [int(a.strip()) for a in enem_anos.split(",") if a.strip().isdigit()]
+            
+            if anos:
+                click.secho(f"📥 Iniciando importação de questões do ENEM para os anos: {', '.join(map(str, anos))}", fg="blue")
+                for ano in anos:
+                    click.secho(f"   → Importando ENEM {ano}...", fg="blue")
+                    try:
+                        resultado = QuestaoService.importar_enem(ano)
+                        if resultado["status"] == "sucesso":
+                            click.secho(f"   ✅ ENEM {ano}: {resultado['mensagem']}", fg="green")
+                        else:
+                            click.secho(f"   ❌ ENEM {ano}: {resultado['mensagem']}", fg="red")
+                            for erro in resultado.get("erros", []):
+                                click.secho(f"      - {erro}", fg="red")
+                    except Exception as e:
+                        click.secho(f"   ❌ Erro fatal ao importar ENEM {ano}: {e}", fg="red")
+            else:
+                click.secho("⚠️ Nenhum ano válido fornecido para a importação do ENEM.", fg="yellow")
 
         click.secho("🎉 Importação concluída com sucesso!", fg="cyan")
 

@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, request
 from flask_login import login_required, current_user
 from app.services.usuario_service import UsuarioService
 
@@ -63,3 +63,44 @@ class UsuarioController:
         except Exception as e:
             print(f"❌ Erro em associar_alunos_ao_professor: {e}")
             return jsonify({"erro": "Erro interno ao associar alunos"}), 500
+
+    @staticmethod
+    @login_required
+    def atualizar(cod_usuario: int):
+        """
+        Atualiza nome e e-mail do usuário.
+        Regras:
+          - Usuário comum: só pode alterar o próprio registro.
+          - Admin: pode alterar qualquer usuário.
+        Body: { "nome": str, "email": str }
+        """
+        try:
+            # permissão
+            is_admin = bool(getattr(current_user, "is_admin", False))
+            is_self = getattr(current_user, "cod_usuario", None) == int(cod_usuario)
+            if not (is_admin or is_self):
+                return jsonify({"erro": "Acesso negado"}), 403
+
+            data = request.get_json(silent=True) or {}
+            nome = data.get("nome")
+            email = data.get("email")
+
+            if nome is None or email is None:
+                return jsonify({"erro": "Campos obrigatórios: nome e email."}), 400
+
+            result = UsuarioService.atualizar_perfil(
+                target_id=cod_usuario,
+                nome=nome,
+                email=email,
+            )
+
+            if "erro" in result:
+                msg = (result.get("erro") or "").lower()
+                status = 409 if ("uso" in msg or "conflito" in msg) else 400
+                return jsonify(result), status
+
+            return jsonify(result), 200
+
+        except Exception as e:
+            print(f"❌ Erro em atualizar (PUT): {e}")
+            return jsonify({"erro": "Erro interno ao atualizar usuário"}), 500

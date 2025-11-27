@@ -10,3 +10,4 @@ questao_bp.route("/<int:cod_questao>", methods=["GET"])(QuestaoController.buscar
 questao_bp.route("/", methods=["POST"])(QuestaoController.criar)
 questao_bp.route("/<int:cod_questao>", methods=["PUT"])(QuestaoController.atualizar)
 questao_bp.route("/<int:cod_questao>", methods=["DELETE"])(QuestaoController.deletar)
+questao_bp.route("/importar-enem", methods=["POST"])(QuestaoController.importar_enem_url)

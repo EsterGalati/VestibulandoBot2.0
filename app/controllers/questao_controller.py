@@ -45,3 +45,25 @@ class QuestaoController:
         if not deletado:
             return jsonify({"erro": "Questão não encontrada."}), 404
         return jsonify(deletado), 200
+
+    @staticmethod
+    def importar_enem_url():
+        dados = request.get_json()
+        anos = dados.get("anos")
+        materias = dados.get("materias") # Lista de códigos de matéria
+
+        if not anos or not isinstance(anos, list) or not anos:
+            return jsonify({"erro": "Lista de anos é obrigatória"}), 400
+        
+        if not materias or not isinstance(materias, list) or not materias:
+            return jsonify({"erro": "Lista de matérias é obrigatória"}), 400
+
+        resultados = []
+        for ano in anos:
+            try:
+                resultado = QuestaoService.importar_enem(int(ano), materias)
+                resultados.append(resultado)
+            except Exception as e:
+                resultados.append({"status": "erro", "ano": ano, "mensagem": f"Erro ao importar questões do ENEM {ano}: {str(e)}"})
+
+        return jsonify(resultados), 200

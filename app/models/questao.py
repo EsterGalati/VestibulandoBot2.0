@@ -12,7 +12,10 @@ class QuestaoENEM(db.Model):
     tx_questao = db.Column("TX_QUESTAO", db.Text, nullable=False)
     ano_questao = db.Column("ANO_QUESTAO", db.Integer, nullable=False, index=True)
     tx_resposta_correta = db.Column("TX_RESPOSTA_CORRETA", db.String(1), nullable=False)
-
+    tx_bncc = db.Column("TX_BNCC", db.String(50), nullable=True)
+    origem = db.Column("ORIGEM", db.String(20), default="professor")  
+    tx_imagem_url = db.Column("TX_IMAGEM_URL", db.String(2000), nullable=True)
+    
     cod_materia = db.Column(
         "COD_MATERIA",
         db.Integer,
