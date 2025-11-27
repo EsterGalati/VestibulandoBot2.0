@@ -47,6 +47,7 @@ class AuthController:
         """Registra um novo usuario e autentica na sessao."""
         email = (payload.get("email") or "").strip().lower()
         senha = (payload.get("senha") or "").strip()
+        nome = (payload.get("nome") or "").strip()
         if not email or not senha:
             message = "Informe email e senha para registrar o usuario."
             AuthController._log_event(
@@ -59,7 +60,7 @@ class AuthController:
             return {"error": "missing_fields", "message": message}, 400
 
         try:
-            user = auth_service.register(email, senha)
+            user = auth_service.register(email, senha, nome)
         except ValueError as exc:
             message = "Este email ja foi cadastrado."
             AuthController._log_event(
