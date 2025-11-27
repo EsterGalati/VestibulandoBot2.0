@@ -13,16 +13,17 @@ class AuthService:
     """Serviço de autenticação e registro de usuários."""
 
     @staticmethod
-    def register(email: str, senha: str) -> Usuario:
+    def register(email: str, senha: str, nome: Optional[str] = None) -> Usuario:
         """
         Registra novo usuário com email/senha.
         Lança ValueError em caso de entrada inválida ou email duplicado.
         """
-        if not email or not senha:
-            raise ValueError("email e senha são obrigatórios")
+        if not email or not senha or not nome:
+            raise ValueError("email, senha e nome são obrigatórios")
 
         user = Usuario(
             email=email.strip().lower(),
+            nome_usuario=nome.strip(),
             senha_hash=generate_password_hash(senha),
         )
         db.session.add(user)
