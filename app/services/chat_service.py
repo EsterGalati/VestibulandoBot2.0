@@ -14,28 +14,51 @@ class ChatService:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel("gemini-2.5-flash")
 
+        # Busca contexto do RAG
         try:
             contexto = rag.buscar(message)
         except Exception as e:
             print(f"⚠️ Erro no RAG: {e}")
             contexto = ""
 
-        if contexto.strip() == "":
-            return "Nenhuma informação sobre isso foi encontrada nos documentos."
-
         prompt = f"""
-Você é uma assistente de estudos para o ENEM. 
-Responda em até um parágrafo curto, em português do Brasil.
-Não utilize asteriscos para deixar a resposta em negrito.
+Você é uma assistente de estudos para o ENEM.
 
-USE EXCLUSIVAMENTE O CONTEXTO ABAIXO para responder a pergunta.
-Se a resposta não estiver no contexto, diga APENAS:
-"Nenhuma informação sobre isso foi encontrada nos documentos."
+IMPORTANTE:
+A mensagem recebida pode não ser sempre uma string simples. Antes de responder,
+verifique internamente se a PERGUNTA DO ALUNO é realmente texto utilizável.
+Caso a pergunta venha como objeto, lista, dicionário ou qualquer outro tipo,
+interprete o conteúdo textual presente e desconsidere estruturas inválidas.
+
+Sua tarefa é analisar cuidadosamente o CONTEXTO fornecido pelo RAG e a PERGUNTA do aluno, aplicando as regras abaixo:
+
+1. Verifique se o contexto é realmente relevante para a pergunta.
+   - O contexto é relevante SOMENTE se ele realmente ajudar a responder a pergunta do aluno.
+   - Se o contexto não tiver relação, for muito genérico ou não ajudar na resposta:
+     → IGNORE completamente o contexto.
+
+2. Se o contexto for relevante:
+   - Utilize o conteúdo do contexto como base principal da resposta.
+   - Em seguida, busque informações adicionais na internet para complementar e enriquecer a resposta.
+   - Adicione ao final:
+     "As informações adicionais vieram de fora dos nossos documentos: [URL]"
+
+3. Se o contexto NÃO for relevante:
+   - Ignore totalmente o contexto.
+   - Busque diretamente na internet uma resposta completa e bem explicada em no máximo um parágrafo.
+   - No final, escreva:
+     "As informações acima vieram de fora dos nossos documentos: [URL]"
+
+4. Regras de estilo da resposta:
+   - Responda SEM usar asteriscos.
+   - Texto claro, direto e curto.
+   - Sempre em português do Brasil.
+   - Separe com uma linha a parte onde a URL será colocada.
 
 ### CONTEXTO (selecionado pelo RAG):
 {contexto}
 
-### PERGUNTA DO ALUNO:
+### PERGUNTA DO ALUNO (convertida para texto):
 {message}
 
 ### RESPOSTA:
@@ -55,7 +78,7 @@ Se a resposta não estiver no contexto, diga APENAS:
                 if parts:
                     return "\n".join(parts)
 
-            return "Não consegui gerar uma resposta útil."
+            return "Não consegui gerar uma resposta no momento. Tente reformular sua pergunta."
 
         except Exception as e:
             print(f"❌ Erro no Gemini: {e}")
