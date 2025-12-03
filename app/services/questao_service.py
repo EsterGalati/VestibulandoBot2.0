@@ -117,7 +117,7 @@ class QuestaoService:
             cod_materia=int(dados["cod_materia"]),
             ano_questao=int(dados["ano_questao"]),
             tx_resposta_correta=dados["tx_resposta_correta"].upper().strip(),
-            bncc=dados.get("tx_bncc"),
+            tx_bncc=dados.get("bncc") or dados.get("tx_bncc"),
             origem="PROFESSOR",
             tx_imagem_url=None
         )
