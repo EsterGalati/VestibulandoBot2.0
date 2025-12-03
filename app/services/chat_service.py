@@ -5,25 +5,60 @@ import google.generativeai as genai
 
 class ChatService:
 
+    # Continua armazenando histórico (se quiser expandir depois)
+    historico = []
+
+    @staticmethod
+    def _registrar_historico(papel: str, conteudo: str):
+
+        ChatService.historico.append({"papel": papel, "conteudo": conteudo})
+
+        if len(ChatService.historico) > 10:
+            ChatService.historico.pop(0)
+
+    @staticmethod
+    def _pegar_ultimo_historico():
+
+        if len(ChatService.historico) < 2:
+            return "Nenhum histórico relevante disponível."
+
+
+        ultimo = ChatService.historico[-1]
+        penultimo = ChatService.historico[-2]
+
+        return f"{penultimo['papel'].upper()}: {penultimo['conteudo']}\n{ultimo['papel'].upper()}: {ultimo['conteudo']}"
+
     @staticmethod
     def gerar_resposta(message: str) -> str:
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
             raise ValueError("GEMINI_API_KEY não configurada")
-        
+
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel("gemini-2.5-flash")
 
-        # Busca contexto do RAG
+        if not isinstance(message, str):
+            try:
+                message = str(message)
+            except:
+                message = "Conteúdo inválido enviado pelo usuário."
+
+        ChatService._registrar_historico("aluno", message)
+
+        # Busca RAG
         try:
             contexto = rag.buscar(message)
         except Exception as e:
             print(f"⚠️ Erro no RAG: {e}")
             contexto = ""
 
-        prompt = f"""
-Você é uma assistente de estudos para o ENEM.
 
+        historico_texto = ChatService._pegar_ultimo_historico()
+
+        prompt = f"""
+
+Você é um assistente de estudos para o ENEM.
+        
 IMPORTANTE:
 A mensagem recebida pode não ser sempre uma string simples. Antes de responder,
 verifique internamente se a PERGUNTA DO ALUNO é realmente texto utilizável.
@@ -55,10 +90,13 @@ Sua tarefa é analisar cuidadosamente o CONTEXTO fornecido pelo RAG e a PERGUNTA
    - Sempre em português do Brasil.
    - Separe com uma linha a parte onde a URL será colocada.
 
-### CONTEXTO (selecionado pelo RAG):
+### ÚLTIMO HISTÓRICO:
+{historico_texto}
+
+### CONTEXTO DO RAG:
 {contexto}
 
-### PERGUNTA DO ALUNO (convertida para texto):
+### PERGUNTA ATUAL:
 {message}
 
 ### RESPOSTA:
@@ -69,14 +107,18 @@ Sua tarefa é analisar cuidadosamente o CONTEXTO fornecido pelo RAG e a PERGUNTA
                 prompt,
                 generation_config={
                     "temperature": 0.7,
-                    "max_output_tokens": 1028,
+                    "max_output_tokens": 2056,
                 }
             )
 
             for cand in response.candidates:
                 parts = [p.text for p in cand.content.parts if hasattr(p, "text")]
                 if parts:
-                    return "\n".join(parts)
+                    resposta_final = "\n".join(parts)
+
+                    ChatService._registrar_historico("assistente", resposta_final)
+
+                    return resposta_final
 
             return "Não consegui gerar uma resposta no momento. Tente reformular sua pergunta."
 
