@@ -50,23 +50,21 @@ Deixe essa janela rodando.
 Em outro terminal, execute os comandos de banco de dados 👇
 
 🏗️ 3.1 Criar tabelas
-docker compose --profile dev run --rm api \
-  python -m flask --app wsgi.py db-init
+docker compose --profile dev run --rm api python -m flask --app wsgi.py db-init 
 
 📥 3.2 Importar dados iniciais (matérias, simulados e questões)
 
 Garanta que os arquivos CSV existam em ./data/:
 
-data/materias.csv
-data/simulados.csv
 data/enem_questoes.csv
-
+data/materias.csv
+data/simulados_questoes.csv
+data/simulados.csv
+data/usuarios.csv
 
 Depois execute:
 
-docker compose --profile dev run --rm api \
-  python -m flask --app wsgi.py import-dados
-
+docker compose --profile dev run --rm api python -m flask --app wsgi.py import-dados
 
 O Docker já mapeia ./data (host) → /seed (container).
 
@@ -77,7 +75,6 @@ GET http://127.0.0.1:8000/api/v1/materias/
 ➤ Criar questão
 POST http://127.0.0.1:8000/api/v1/questoes/
 Content-Type: application/json
-
 
 Body:
 
@@ -121,6 +118,13 @@ POST http://127.0.0.1:8000/api/v1/simulados/1/resultados
   "qtd_erros": 2
 }
 
+➤ Registrar resultado do aluno
+POST http://127.0.0.1:8000/api/v1/chat/message
+
+{
+  "message": "Me fale sobre biologia"
+}
+
 🧩 3.4 Logs / shell dentro do container
 docker compose --profile dev logs -f api
 docker compose --profile dev exec api bash
@@ -131,6 +135,9 @@ Parar serviços dev:
 
 docker compose --profile dev down
 
+Para resetar o banco:
+
+docker compose --profile dev run --rm api python -m flask --app wsgi.py db-reset
 
 Apagar volume do banco (reset total):
 
